@@ -44,7 +44,7 @@ import java.util.Map;
             }
 
             public String getFieldName() {
-                return this.fieldName
+                return this.fieldName;
             }
         }
 
@@ -102,11 +102,6 @@ import java.util.Map;
 
     @Override
     public void doGet(BaseSolrResource endpoint, String childId) {
-
-    }
-
-    @Override
-    void doPut() {
 
     }
 
