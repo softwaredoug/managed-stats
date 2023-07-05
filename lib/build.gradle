@@ -31,6 +31,11 @@ dependencies {
     implementation 'org.apache.solr:solr-core:9.2.1'
 }
 
+test {
+  jvmArgs = ['-ea']
+  systemProperties = ['java.security.egd': 'file:/dev/./urandom']
+}
+
 // Apply a specific Java toolchain to ease working on different environments.
 java {
     toolchain {
