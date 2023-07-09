@@ -6,8 +6,8 @@ import org.apache.solr.core.SolrCore;
 import org.apache.solr.core.SolrResourceLoader;
 import org.apache.solr.rest.BaseSolrResource;
 import org.apache.solr.rest.ManagedResource;
+import org.apache.solr.rest.ManagedResourceObserver;
 import org.apache.solr.rest.ManagedResourceStorage;
-import org.apache.solr.util.plugin.SolrCoreAware;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -16,6 +16,21 @@ import java.util.Map;
 // Reference
 // https://github.com/apache/solr/blob/main/solr/modules/ltr/src/java/org/apache/solr/ltr/store/rest/ManagedFeatureStore.java
     public class ManagedStats extends ManagedResource {
+        public static final String REST_END_POINT = "/schema/term-stats";
+
+
+        public static void registerManagedStats(
+                SolrResourceLoader solrResourceLoader, ManagedResourceObserver managedResourceObserver) {
+            solrResourceLoader
+                    .getManagedResourceRegistry()
+                    .registerManagedResource(
+                            REST_END_POINT, ManagedStats.class, managedResourceObserver);
+        }
+
+    public static ManagedStats getManagedStats(SolrCore core) {
+        return (ManagedStats) core.getRestManager().getManagedResource(REST_END_POINT);
+    }
+
 
         public static class FieldStats {
             private String fieldName;

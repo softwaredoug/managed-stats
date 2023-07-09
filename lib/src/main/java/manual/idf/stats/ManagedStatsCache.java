@@ -3,10 +3,17 @@
  */
 package manual.idf.stats;
 
+import org.apache.lucene.util.ResourceLoader;
+import org.apache.lucene.util.ResourceLoaderAware;
+import org.apache.solr.core.SolrResourceLoader;
+import org.apache.solr.common.SolrException;
+import org.apache.solr.common.util.NamedList;
 import org.apache.solr.handler.component.ResponseBuilder;
 import org.apache.solr.handler.component.ShardRequest;
 import org.apache.solr.handler.component.ShardResponse;
 import org.apache.solr.request.SolrQueryRequest;
+import org.apache.solr.rest.ManagedResource;
+import org.apache.solr.rest.ManagedResourceObserver;
 import org.apache.solr.search.SolrIndexSearcher;
 import org.apache.solr.search.stats.LocalStatsSource;
 import org.apache.solr.search.stats.StatsCache;
@@ -14,12 +21,18 @@ import org.apache.solr.search.stats.StatsSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.util.List;
 
-public class ManagedStatsCache extends StatsCache {
+public class ManagedStatsCache extends StatsCache implements ResourceLoaderAware, ManagedResourceObserver {
     private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+    private ManagedStats stats;
 
+
+    public ManagedStatsCache() {
+        super();
+    }
 
     @Override
     protected StatsSource doGet(SolrQueryRequest req) {
@@ -60,6 +73,19 @@ public class ManagedStatsCache extends StatsCache {
     @Override
     protected void doSendGlobalStats(ResponseBuilder rb, ShardRequest outgoing) {
         log.debug("## SGS {}", outgoing);
+    }
+
+    @Override
+    public void inform(ResourceLoader loader) throws IOException {
+        final SolrResourceLoader solrResourceLoader = (SolrResourceLoader) loader;
+        ManagedStats.registerManagedStats(solrResourceLoader, this);
+    }
+
+    @Override
+    public void onManagedResourceInitialized(NamedList<?> args, ManagedResource res) throws SolrException {
+        if (res instanceof ManagedStats) {
+            this.stats = (ManagedStats) stats;
+        }
     }
 }
 

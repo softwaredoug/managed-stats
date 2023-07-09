@@ -12,9 +12,12 @@ import static org.junit.Assert.*;
 
 public class LibraryTest extends SolrTestCaseJ4 {
 
-    @BeforeClass
-    public static void beforeClass() throws Exception {
+    private ManagedStats managedStats;
+
+    @Before
+    public void setupStats() throws Exception {
         initCore("solrconfig-ltr.xml", "schema.xml", "build/resources/test/solr");
+        managedStats = ManagedStats.getManagedStats(this.h.getCore());
     }
 
     @After
