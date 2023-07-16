@@ -5,6 +5,8 @@ import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.tokenattributes.TermToBytesRefAttribute;
 import org.apache.lucene.index.IndexableField;
 import org.apache.lucene.index.Term;
+import org.apache.lucene.search.CollectionStatistics;
+import org.apache.lucene.search.TermStatistics;
 import org.apache.lucene.util.BytesRef;
 import org.apache.lucene.util.ResourceLoader;
 import org.apache.lucene.util.ResourceLoaderAware;
@@ -17,13 +19,14 @@ import org.apache.solr.search.stats.TermStats;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 public class ManagedTextField extends TextField implements ResourceLoaderAware {
 
     private String statsFile;
-    private CollectionStats globalStats;
+    private CollectionStatistics globalStats;
     private List<AnalyzedTermStats> termStats;  // field -> termStats
 
     @Override
@@ -64,6 +67,21 @@ public class ManagedTextField extends TextField implements ResourceLoaderAware {
             totalTermFreq = Long.parseLong(line_split[2]);
             this.termStats.add(new AnalyzedTermStats(unanalyzedTerm, docFreq, totalTermFreq));
         }
+    }
+
+    public TermStatistics termStatistics(Term term) {
+        // slow for correctness, very bad to do this here
+        for (AnalyzedTermStats stats: this.termStats) {
+            TermStatistics thisStat = stats.getStats(term.field(), this.getIndexAnalyzer());
+            if (thisStat.term().equals(term)) {
+                return thisStat;
+            }
+        }
+        return null;
+    }
+
+    public CollectionStatistics collectionStatistics(String field) {
+        return globalStats;
     }
 
     @Override
@@ -110,10 +128,10 @@ public class ManagedTextField extends TextField implements ResourceLoaderAware {
 
         };
 
-        public TermStats getStats(String field, Analyzer indexAnalyzer) {
+        public TermStatistics getStats(String field, Analyzer indexAnalyzer) {
             Term term = this.getTerm(field, indexAnalyzer);
             if (term != null) {
-                return new TermStats(field, this.docFreq, this.totalTermFreq);
+                return new TermStatistics(term.bytes(), this.docFreq, this.totalTermFreq);
             }
             return null;
         }

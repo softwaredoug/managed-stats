@@ -8,6 +8,7 @@ import org.apache.solr.handler.component.ShardRequest;
 import org.apache.solr.handler.component.ShardResponse;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.search.SolrIndexSearcher;
+import org.apache.solr.search.stats.LocalStatsCache;
 import org.apache.solr.search.stats.LocalStatsSource;
 import org.apache.solr.search.stats.StatsCache;
 import org.apache.solr.search.stats.StatsSource;
@@ -17,7 +18,7 @@ import org.slf4j.LoggerFactory;
 import java.lang.invoke.MethodHandles;
 import java.util.List;
 
-public class ManagedStatsCache extends StatsCache {
+public class ManagedStatsCache extends LocalStatsCache {
     private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
     private ManagedStats stats;
 
@@ -30,7 +31,7 @@ public class ManagedStatsCache extends StatsCache {
     protected StatsSource doGet(SolrQueryRequest req) {
         log.debug("## GET {}", req);
         StatsSource fallback = new LocalStatsSource(statsCacheMetrics);
-        return new ManagedStatsSource(fallback, statsCacheMetrics);
+        return new ManagedStatsSource(fallback, statsCacheMetrics, req.getSchema());
     }
 
     // by returning null we don't create additional round-trip request.

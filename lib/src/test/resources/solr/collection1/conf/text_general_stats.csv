@@ -8,3 +8,5 @@
 10,10,10,10
 foo,2,8
 bar,1,4
+stopword,4,8
+two terms,4,8
