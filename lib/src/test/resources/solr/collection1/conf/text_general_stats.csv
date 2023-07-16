@@ -1,0 +1,10 @@
+# Contains a header with global term stats
+# maxDoc, docCount, sumTotalTermFreq, sumDocFreq
+#
+# Followed by a term stats for this field.
+#
+# All terms will be analyzed by the field's index analyzer prior to being loaded.
+#
+10,10,10,10
+foo,2,8
+bar,1,4
