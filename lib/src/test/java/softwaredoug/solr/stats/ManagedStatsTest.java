@@ -4,17 +4,25 @@
 package softwaredoug.solr.stats;
 
 import org.apache.solr.SolrTestCaseJ4;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.apache.solr.core.SolrCore;
+import org.apache.solr.schema.FieldType;
+import org.apache.solr.schema.IndexSchema;
+import org.apache.solr.schema.SchemaField;
+import org.junit.*;
 
 public class ManagedStatsTest extends SolrTestCaseJ4 {
 
-    private ManagedStats managedStats;
+    private ManagedTextField managedField;
 
     @Before
     public void setupStats() throws Exception {
+        // All tests relative to this
         initCore("solrconfig.xml", "schema.xml", "build/resources/test/solr");
+
+        SolrCore core = this.h.getCore();
+        IndexSchema schema = core.getLatestSchema();
+        FieldType fieldType = schema.getFieldTypeByName("text_general");
+        this.managedField = (ManagedTextField)fieldType;
     }
 
     @After
@@ -22,7 +30,17 @@ public class ManagedStatsTest extends SolrTestCaseJ4 {
         deleteCore();
     }
 
-    @Test public void someLibraryMethodReturnsTrue() {
-        System.out.println("Test!");
+    @Test
+    public void testParsedFieldTypeCorrectly() {
+        SolrCore core = this.h.getCore();
+        IndexSchema schema = core.getLatestSchema();
+        FieldType fieldType = schema.getFieldTypeByName("text_general");
+        ManagedTextField asManagedField = (ManagedTextField)fieldType;
+        assertNotNull("Field Type text_general not parsed from schema", asManagedField);
+    }
+
+    @Test
+    public void testHasCollectionStats() {
+        this.managedField.collectionStatistics("foo");
     }
 }
