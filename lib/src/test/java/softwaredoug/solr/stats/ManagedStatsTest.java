@@ -3,6 +3,7 @@
  */
 package softwaredoug.solr.stats;
 
+import org.apache.lucene.search.CollectionStatistics;
 import org.apache.solr.SolrTestCaseJ4;
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.schema.FieldType;
@@ -41,6 +42,7 @@ public class ManagedStatsTest extends SolrTestCaseJ4 {
 
     @Test
     public void testHasCollectionStats() {
-        this.managedField.collectionStatistics("foo");
+        CollectionStatistics stats = this.managedField.collectionStatistics("foo");
+        assertEquals(stats.docCount(), 10);
     }
 }

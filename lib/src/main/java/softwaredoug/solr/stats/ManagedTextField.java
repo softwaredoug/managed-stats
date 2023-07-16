@@ -26,7 +26,11 @@ import java.util.Map;
 public class ManagedTextField extends TextField implements ResourceLoaderAware {
 
     private String statsFile;
-    private CollectionStatistics globalStats;
+    private long docCount;
+    private long maxDocs;
+    private long sumTotalTermFreq;
+    private long sumTotalDocFreq;
+
     private List<AnalyzedTermStats> termStats;  // field -> termStats
 
     @Override
@@ -49,12 +53,16 @@ public class ManagedTextField extends TextField implements ResourceLoaderAware {
         if (statsHeader.length != 4) {
             throw new IllegalArgumentException("First line of stats should provide 4 total stats");
         }
-        Long[] stats = new Long[4];
+        long[] stats = new long[4];
         int idx = 0;
         for (String globalStat : statsHeader) {
-            stats[idx] = Long.getLong(globalStat);
+            stats[idx] = Long.parseLong(globalStat);
             idx++;
         }
+        this.docCount = stats[0];
+        this.maxDocs = stats[1];
+        this.sumTotalTermFreq = stats[2];
+        this.sumTotalDocFreq = stats[3];
 
         // Now for individual terms
         String unanalyzedTerm = null;
@@ -81,7 +89,7 @@ public class ManagedTextField extends TextField implements ResourceLoaderAware {
     }
 
     public CollectionStatistics collectionStatistics(String field) {
-        return globalStats;
+        return new CollectionStatistics(field, this.maxDocs, this.docCount, this.sumTotalTermFreq, this.sumTotalDocFreq);
     }
 
     @Override
