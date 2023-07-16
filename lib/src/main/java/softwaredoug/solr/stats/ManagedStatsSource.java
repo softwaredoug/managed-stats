@@ -1,4 +1,4 @@
-package manual.idf.stats;
+package softwaredoug.solr.stats;
 
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.CollectionStatistics;

@@ -1,4 +1,4 @@
-package manual.idf.stats;
+package softwaredoug.solr.stats;
 
 import org.apache.lucene.util.ResourceLoader;
 import org.apache.lucene.util.ResourceLoaderAware;

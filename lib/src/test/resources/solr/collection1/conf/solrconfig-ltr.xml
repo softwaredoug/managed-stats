@@ -25,7 +25,7 @@
    <requestParsers />
  </requestDispatcher>
 
- <statsCache class="manual.idf.stats.ManagedStatsCache" />
+ <statsCache class="softwaredoug.solr.stats.ManagedStatsCache" />
 
 
  <updateHandler class="solr.DirectUpdateHandler2">

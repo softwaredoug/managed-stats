@@ -1,4 +1,4 @@
-package manual.idf.stats;
+package softwaredoug.solr.stats;
 
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.util.NamedList;
