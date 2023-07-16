@@ -8,13 +8,13 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-public class LibraryTest extends SolrTestCaseJ4 {
+public class ManagedStatsTest extends SolrTestCaseJ4 {
 
     private ManagedStats managedStats;
 
     @Before
     public void setupStats() throws Exception {
-        initCore("solrconfig-ltr.xml", "schema.xml", "build/resources/test/solr");
+        initCore("solrconfig.xml", "schema.xml", "build/resources/test/solr");
     }
 
     @After
