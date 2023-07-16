@@ -17,7 +17,6 @@ public class LibraryTest extends SolrTestCaseJ4 {
     @Before
     public void setupStats() throws Exception {
         initCore("solrconfig-ltr.xml", "schema.xml", "build/resources/test/solr");
-        managedStats = ManagedStats.getManagedStats(this.h.getCore());
     }
 
     @After

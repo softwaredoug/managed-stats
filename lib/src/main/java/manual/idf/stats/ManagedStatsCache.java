@@ -25,7 +25,7 @@ import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.util.List;
 
-public class ManagedStatsCache extends StatsCache implements ResourceLoaderAware, ManagedResourceObserver {
+public class ManagedStatsCache extends StatsCache {
     private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
     private ManagedStats stats;
 
@@ -75,17 +75,5 @@ public class ManagedStatsCache extends StatsCache implements ResourceLoaderAware
         log.debug("## SGS {}", outgoing);
     }
 
-    @Override
-    public void inform(ResourceLoader loader) throws IOException {
-        final SolrResourceLoader solrResourceLoader = (SolrResourceLoader) loader;
-        ManagedStats.registerManagedStats(solrResourceLoader, this);
-    }
-
-    @Override
-    public void onManagedResourceInitialized(NamedList<?> args, ManagedResource res) throws SolrException {
-        if (res instanceof ManagedStats) {
-            this.stats = (ManagedStats) stats;
-        }
-    }
 }
 
