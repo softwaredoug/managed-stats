@@ -5,8 +5,12 @@
 #
 # All terms will be analyzed by the field's index analyzer prior to being loaded.
 #
-10,10,10,10
+10,11,13,13
 foo,2,8
 bar,1,4
 stopword,4,8
+UPPERCASE,3,8
 two terms,4,8
+
+# Doc freq should not be higher that total term freq
+# impossible_doc_freq,60,50

@@ -73,6 +73,10 @@ public class ManagedTextField extends TextField implements ResourceLoaderAware {
             unanalyzedTerm = line_split[0];
             docFreq = Long.parseLong(line_split[1]);
             totalTermFreq = Long.parseLong(line_split[2]);
+
+            if (docFreq > totalTermFreq) {
+                throw new IllegalArgumentException("Doc stats error at: <" + line + "> -- docFreq more than totalTermFreq not allowed");
+            }
             this.termStats.add(new AnalyzedTermStats(unanalyzedTerm, docFreq, totalTermFreq));
         }
     }
@@ -81,7 +85,7 @@ public class ManagedTextField extends TextField implements ResourceLoaderAware {
         // slow for correctness, very bad to do this here
         for (AnalyzedTermStats stats: this.termStats) {
             TermStatistics thisStat = stats.getStats(term.field(), this.getIndexAnalyzer());
-            if (thisStat.term().equals(term)) {
+            if (thisStat != null && thisStat.term().equals(term.bytes())) {
                 return thisStat;
             }
         }
@@ -100,7 +104,7 @@ public class ManagedTextField extends TextField implements ResourceLoaderAware {
     // TermStats read at the FieldType level before a field is created
     public static class AnalyzedTermStats {
 
-        private String analyzedTerm;
+        private BytesRef analyzedTerm;
         private String unanalyzedTerm;
         private long docFreq;
         private long totalTermFreq;
@@ -127,7 +131,7 @@ public class ManagedTextField extends TextField implements ResourceLoaderAware {
                     if (source.incrementToken()) {
                         return null;
                     }
-                    this.analyzedTerm = termBytes.toString();
+                    this.analyzedTerm = termBytes;
                     return new Term(field, this.analyzedTerm);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
