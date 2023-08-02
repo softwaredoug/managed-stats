@@ -30,14 +30,46 @@ public class ManagedStatsCacheTest extends SolrTestCaseJ4 {
         deleteCore();
     }
 
-    public void testSearch() {
+    public void testSearchNotManagedTerm() {
         assertQ(
-                "dumb search",
+                "searching for not managed term",
                 req(
                         "q", "tool",
                         "qf", "text",
                         "defType", "edismax"),
                 "*[count(//doc)=1]");
+    }
+
+    public void testSearchManagedTermMatchesOne() {
+        assertQ(
+                "dumb search",
+                req(
+                        "q", "foo",
+                        "qf", "text",
+                        "defType", "edismax"),
+                "*[count(//doc)=1]");
+    }
+
+    public void testSearchManagedTermUsesCorrectDocFreq() {
+        assertQ(
+                "search uses managed doc freq",
+                req(
+                        "q", "foo",
+                        "qf", "text",
+                        "defType", "edismax",
+                        "debug", "true"),
+                "//lst[@name='explain']/str[@name='3' and contains(text(),\"2 = n, number of documents containing term\")]");
+    }
+
+    public void testSearchManagedTermUsesCorrectDocCount() {
+        assertQ(
+                "search uses doc count",
+                req(
+                        "q", "foo",
+                        "qf", "text",
+                        "defType", "edismax",
+                        "debug", "true"),
+                "//lst[@name='explain']/str[@name='3' and contains(text(),\"10 = N, total number of documents with field\")]");
     }
 
 
@@ -47,6 +79,10 @@ public class ManagedStatsCacheTest extends SolrTestCaseJ4 {
                      "text", "Democratic Order op Planets"));
         assertU(adoc("id", "2", "text", "Tool"
                 ));
+        assertU(adoc("id", "3", "text", "foo"
+        ));
+        assertU(adoc("id", "4", "text", "bar"
+        ));
         assertU(commit());
     }
 }
