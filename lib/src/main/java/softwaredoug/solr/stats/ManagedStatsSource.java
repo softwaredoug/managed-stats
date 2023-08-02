@@ -38,7 +38,11 @@ public class ManagedStatsSource extends StatsSource {
         if (fieldType == null) {
             return this.fallback.termStatistics(localSearcher, term, docFreq, totalTermFreq);
         }
-        return fieldType.termStatistics(term);
+        TermStatistics termStats = fieldType.termStatistics(term);
+        if (termStats == null) {
+            termStats = this.fallback.termStatistics(localSearcher, term, docFreq, totalTermFreq);
+        }
+        return termStats;
     }
 
     @Override
