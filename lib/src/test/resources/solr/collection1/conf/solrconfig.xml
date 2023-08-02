@@ -27,7 +27,6 @@
 
  <statsCache class="softwaredoug.solr.stats.ManagedStatsCache" />
 
-
  <updateHandler class="solr.DirectUpdateHandler2">
   <autoCommit>
    <maxTime>15000</maxTime>
@@ -42,8 +41,8 @@
  </updateHandler>
 
  <requestHandler name="/update" class="solr.UpdateRequestHandler" />
- <!-- Query request handler managing models and features -->
- <requestHandler name="/query" class="solr.SearchHandler">
+
+ <requestHandler name="/select" class="solr.SearchHandler">
   <lst name="defaults">
    <str name="echoParams">explicit</str>
    <str name="wt">json</str>

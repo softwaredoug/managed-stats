@@ -22,6 +22,7 @@ public class ManagedStatsCacheTest extends SolrTestCaseJ4 {
         FieldType fieldType = schema.getFieldTypeByName("text_general");
         this.managedField = (ManagedTextField)fieldType;
 
+        indexDocs();
     }
 
     @After
@@ -29,12 +30,23 @@ public class ManagedStatsCacheTest extends SolrTestCaseJ4 {
         deleteCore();
     }
 
+    public void testSearch() {
+        assertQ(
+                "dumb search",
+                req(
+                        "q", "tool",
+                        "qf", "text",
+                        "defType", "edismax"),
+                "*[count(//doc)=1]");
+    }
+
 
     public void indexDocs() {
 
         assertU(adoc("id", "1",
-                     "text_general", "Democratic Order op Planets"));
-        assertU(adoc("id", "2", "text_general", "Tool"
+                     "text", "Democratic Order op Planets"));
+        assertU(adoc("id", "2", "text", "Tool"
                 ));
+        assertU(commit());
     }
 }
