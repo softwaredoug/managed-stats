@@ -7,15 +7,13 @@ import org.apache.lucene.index.Term;
 import org.apache.lucene.search.CollectionStatistics;
 import org.apache.lucene.search.TermStatistics;
 import org.apache.lucene.util.BytesRef;
-import org.apache.lucene.util.BytesRefBuilder;
 import org.apache.solr.SolrTestCaseJ4;
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.schema.FieldType;
 import org.apache.solr.schema.IndexSchema;
-import org.apache.solr.schema.SchemaField;
 import org.junit.*;
 
-public class ManagedStatsTest extends SolrTestCaseJ4 {
+public class ManagedStatsFieldTest extends SolrTestCaseJ4 {
 
     private ManagedTextField managedField;
 
@@ -80,7 +78,7 @@ public class ManagedStatsTest extends SolrTestCaseJ4 {
         TermStatistics termStats = this.managedField.termStatistics(term);
         assertNull(termStats);
     }
-    
+
     @Test
     public void testAnalyzesToMultipleTermsIgnored() {
         BytesRef text = new BytesRef("two terms".getBytes());
