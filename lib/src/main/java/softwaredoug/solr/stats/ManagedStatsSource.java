@@ -1,6 +1,7 @@
 package softwaredoug.solr.stats;
 
 import org.apache.lucene.index.Term;
+import org.apache.lucene.index.TermContext;
 import org.apache.lucene.search.CollectionStatistics;
 import org.apache.lucene.search.TermStatistics;
 import org.apache.solr.schema.FieldType;
@@ -15,14 +16,12 @@ import java.io.IOException;
 
 public class ManagedStatsSource extends StatsSource {
 
-    private final StatsCache.StatsCacheMetrics metrics;
     private StatsSource fallback;
 
     private IndexSchema schema;
 
-    public ManagedStatsSource(StatsSource fallback, StatsCache.StatsCacheMetrics metrics, IndexSchema schema) {
+    public ManagedStatsSource(StatsSource fallback, IndexSchema schema) {
         this.fallback = fallback;
-        this.metrics = metrics;
         this.schema = schema;
     }
 
@@ -33,17 +32,16 @@ public class ManagedStatsSource extends StatsSource {
     }
 
     @Override
-    public TermStatistics termStatistics(SolrIndexSearcher localSearcher, Term term, int docFreq, long totalTermFreq) throws IOException {
+    public TermStatistics termStatistics(SolrIndexSearcher localSearcher, Term term, TermContext context) throws IOException {
         ManagedTextField fieldType = this.getAsManagedTextField(term.field());
         if (fieldType == null) {
-            return this.fallback.termStatistics(localSearcher, term, docFreq, totalTermFreq);
+            return this.fallback.termStatistics(localSearcher, term, context);
         }
         TermStatistics termStats = fieldType.termStatistics(term);
         if (termStats == null) {
-            termStats = this.fallback.termStatistics(localSearcher, term, docFreq, totalTermFreq);
+            termStats = this.fallback.termStatistics(localSearcher, term, context);
         }
-        return termStats;
-    }
+        return termStats;    }
 
     @Override
     public CollectionStatistics collectionStatistics(SolrIndexSearcher localSearcher, String field) throws IOException {

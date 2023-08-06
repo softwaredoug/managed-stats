@@ -28,45 +28,21 @@ public class ManagedStatsCache extends LocalStatsCache {
     }
 
     @Override
-    protected StatsSource doGet(SolrQueryRequest req) {
+    public StatsSource get(SolrQueryRequest req) {
         log.debug("## GET {}", req);
-        StatsSource fallback = new LocalStatsSource(statsCacheMetrics);
-        return new ManagedStatsSource(fallback, statsCacheMetrics, req.getSchema());
+        StatsSource fallback = new LocalStatsSource();
+        return new ManagedStatsSource(fallback, req.getSchema());
     }
 
     // by returning null we don't create additional round-trip request.
     @Override
-    protected ShardRequest doRetrieveStatsRequest(ResponseBuilder rb) {
+    public ShardRequest retrieveStatsRequest(ResponseBuilder rb) {
         log.debug("## RSR {}", rb.req);
         // already incremented the stats - decrement it now
-        statsCacheMetrics.retrieveStats.decrement();
         return null;
     }
 
-    @Override
-    protected void doMergeToGlobalStats(SolrQueryRequest req, List<ShardResponse> responses) {
-        if (log.isDebugEnabled()) {
-            log.debug("## MTGS {}", req);
-            for (ShardResponse r : responses) {
-                log.debug(" - {}", r);
-            }
-        }
-    }
 
-    @Override
-    protected void doReturnLocalStats(ResponseBuilder rb, SolrIndexSearcher searcher) {
-        log.debug("## RLS {}", rb.req);
-    }
-
-    @Override
-    protected void doReceiveGlobalStats(SolrQueryRequest req) {
-        log.debug("## RGS {}", req);
-    }
-
-    @Override
-    protected void doSendGlobalStats(ResponseBuilder rb, ShardRequest outgoing) {
-        log.debug("## SGS {}", outgoing);
-    }
 
 }
 

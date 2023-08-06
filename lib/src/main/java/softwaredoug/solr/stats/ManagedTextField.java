@@ -3,19 +3,19 @@ package softwaredoug.solr.stats;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.tokenattributes.TermToBytesRefAttribute;
+import org.apache.lucene.analysis.util.ResourceLoader;
+import org.apache.lucene.analysis.util.ResourceLoaderAware;
 import org.apache.lucene.index.IndexableField;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.CollectionStatistics;
 import org.apache.lucene.search.TermStatistics;
 import org.apache.lucene.util.BytesRef;
-import org.apache.lucene.util.ResourceLoader;
-import org.apache.lucene.util.ResourceLoaderAware;
+
 import org.apache.solr.core.SolrResourceLoader;
 import org.apache.solr.schema.IndexSchema;
 import org.apache.solr.schema.SchemaField;
 import org.apache.solr.schema.TextField;
-import org.apache.solr.search.stats.CollectionStats;
-import org.apache.solr.search.stats.TermStats;
+
 
 import java.io.IOException;
 import java.util.*;
