@@ -20,7 +20,8 @@
   <fields>
     <field name="id" type="string" indexed="true" stored="true" required="true" multiValued="false" />
     <field name="text" type="text_general" indexed="true" stored="false" multiValued="true"/>
-    <field name="_version_" type="long" indexed="true" stored="true"/>
+    <field name="text_other" type="text_general" indexed="true" stored="false" multiValued="true"/>
+    <field name="_version_" type="long" indexed="true" stored="true" />
   </fields>
 
   <uniqueKey>id</uniqueKey>
