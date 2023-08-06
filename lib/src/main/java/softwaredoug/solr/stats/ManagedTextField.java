@@ -18,10 +18,7 @@ import org.apache.solr.search.stats.CollectionStats;
 import org.apache.solr.search.stats.TermStats;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ManagedTextField extends TextField implements ResourceLoaderAware {
 
@@ -70,9 +67,17 @@ public class ManagedTextField extends TextField implements ResourceLoaderAware {
         long totalTermFreq = 0;
         for (String line : lines) {
             String[] line_split = line.split(",");
-            unanalyzedTerm = line_split[0];
-            docFreq = Long.parseLong(line_split[1]);
-            totalTermFreq = Long.parseLong(line_split[2]);
+
+            if (line_split.length < 3) {
+                throw new IllegalArgumentException("Error at line: " + line +
+                        ": Managed stat row requires 3 comma separated values: term,docFreq,totalTermFreq");
+            }
+
+            docFreq = Long.parseLong(line_split[line_split.length-2]);
+            totalTermFreq = Long.parseLong(line_split[line_split.length-1]);
+
+            String[] remainder = Arrays.copyOf(line_split, line_split.length-2);
+            unanalyzedTerm = String.join(",", remainder);
 
             if (docFreq > totalTermFreq) {
                 throw new IllegalArgumentException("Doc stats error at: <" + line + "> -- docFreq more than totalTermFreq not allowed");

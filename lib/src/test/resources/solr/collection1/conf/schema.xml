@@ -50,8 +50,6 @@
     </fieldType>
   </types>
 
-  <statsCache class="softwaredoug.solr.stats.ManagedStatsCache"/>
-
   <!-- Similarity is the scoring routine for each document vs. a query.
        A custom Similarity or SimilarityFactory may be specified here, but
        the default is fine for most applications.

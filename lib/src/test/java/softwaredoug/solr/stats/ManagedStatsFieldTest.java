@@ -86,4 +86,12 @@ public class ManagedStatsFieldTest extends SolrTestCaseJ4 {
         TermStatistics termStats = this.managedField.termStatistics(term);
         assertNull(termStats);
     }
+
+    @Test
+    public void testAnalyzesCommaTermsCorrectly() {
+        BytesRef text = new BytesRef("comma,term".getBytes());
+        Term term = new Term("text", text);
+        TermStatistics termStats = this.managedField.termStatistics(term);
+        assertNull(termStats);
+    }
 }
