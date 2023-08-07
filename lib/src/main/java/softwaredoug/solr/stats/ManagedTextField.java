@@ -33,6 +33,12 @@ public class ManagedTextField extends TextField implements ResourceLoaderAware {
         this.statsFile = args.remove("stats");
         this.termStats = new ArrayList<AnalyzedTermStats>();
         this.fieldStats = new HashMap<String, CollectionStatistics>();
+        
+        this.override_all_fields = false;
+        String override = args.remove("override");
+        if (override != null) {
+            this.override_all_fields = Boolean.valueOf(override);
+        }
 
         super.init(schema, args);
     }
