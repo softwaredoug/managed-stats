@@ -20,8 +20,6 @@ import java.util.List;
 
 public class ManagedStatsCache extends LocalStatsCache {
     private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-    private ManagedStats stats;
-
 
     public ManagedStatsCache() {
         super();
