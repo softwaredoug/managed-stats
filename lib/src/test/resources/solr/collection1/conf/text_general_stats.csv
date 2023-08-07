@@ -1,5 +1,7 @@
 # Contains a header with global term stats
-# maxDoc, docCount, sumTotalTermFreq, sumDocFreq
+#
+# field, docCount, maxDocs, sumTotalTermFreq, sumDocFreq
+#
 #
 # Followed by a term stats for this field.
 #

@@ -4,8 +4,8 @@ import org.apache.solr.SolrTestCaseJ4;
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.schema.FieldType;
 import org.apache.solr.schema.IndexSchema;
+import org.junit.After;
 import org.junit.Before;
-
 public class ManagedStatsCacheUnusedOverrideTest extends SolrTestCaseJ4 {
     private ManagedTextField managedField;
 
@@ -22,7 +22,12 @@ public class ManagedStatsCacheUnusedOverrideTest extends SolrTestCaseJ4 {
         indexDocs();
     }
 
-    public void testSearchNonManagedFieldIsNowActuallyManaged() {
+    @After
+    public void cleanup() {
+        deleteCore();
+    }
+
+    public void testSearchNonManagedFieldGetsRightDocFreq() {
         assertQ(
                 "search uses doc count",
                 req(
@@ -31,6 +36,18 @@ public class ManagedStatsCacheUnusedOverrideTest extends SolrTestCaseJ4 {
                         "defType", "edismax",
                         "debug", "true"),
                 "//lst[@name='explain']/str[@name='3' and contains(text(),\"10.0 = docFreq\")]");
+
+    }
+
+    public void testSearchNonManagedFieldGetsRightDocCount() {
+        assertQ(
+                "search uses doc count",
+                req(
+                        "q", "burritos",
+                        "qf", "not_managed",
+                        "defType", "edismax",
+                        "debug", "true"),
+                "//lst[@name='explain']/str[@name='3' and contains(text(),\"50.0 = docCount\")]");
 
     }
 

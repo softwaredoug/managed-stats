@@ -94,17 +94,21 @@ public class ManagedStatsSource extends StatsSource {
         TermStatistics termStats = fieldType.termStatistics(term);
         if (termStats == null) {
             termStats = this.fallback.termStatistics(localSearcher, term, docFreq, totalTermFreq);
+            log.info("Falling back(2) for term:" + term.text());
+            return this.fallback.termStatistics(localSearcher, term, docFreq, totalTermFreq);
         }
-        log.info("Found stats for term for term :" + term.text());
+        log.info("Found stats for term:" + term.text());
         return termStats;
     }
 
     @Override
     public CollectionStatistics collectionStatistics(SolrIndexSearcher localSearcher, String field) throws IOException {
-        ManagedTextField fieldType = this.fieldAsManagedTextField(field);
+        ManagedTextField fieldType = this.getBestManagedTextField(field);
         if (fieldType == null) {
+            log.info("Falling back for field:" + field);
             return this.fallback.collectionStatistics(localSearcher, field);
         }
+        log.info("Found stats for field:" + field);
         return fieldType.collectionStatistics(field);
     }
 }

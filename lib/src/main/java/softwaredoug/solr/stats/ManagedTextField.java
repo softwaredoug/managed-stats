@@ -16,11 +16,15 @@ import org.apache.solr.schema.SchemaField;
 import org.apache.solr.schema.TextField;
 import org.apache.solr.search.stats.CollectionStats;
 import org.apache.solr.search.stats.TermStats;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.lang.invoke.MethodHandles;
 import java.util.*;
 
 public class ManagedTextField extends TextField implements ResourceLoaderAware {
+    private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     private String statsFile;
     private boolean override_all_fields;
@@ -82,7 +86,7 @@ public class ManagedTextField extends TextField implements ResourceLoaderAware {
                 long maxDocs = stats[1];
                 long sumTotalTermFreq = stats[2];
                 long sumTotalDocFreq = stats[3];
-
+                log.info("Tracking global stats for field:" + fieldName);
                 fieldStats.put(fieldName,
                                 new CollectionStatistics(fieldName, maxDocs, docCount, sumTotalTermFreq, sumTotalDocFreq));
             }
@@ -109,6 +113,7 @@ public class ManagedTextField extends TextField implements ResourceLoaderAware {
                 if (docFreq > totalTermFreq) {
                     throw new IllegalArgumentException("Doc stats error at: <" + line + "> -- docFreq more than totalTermFreq not allowed");
                 }
+                log.trace("Tracking term stats for field:" + field + " term:" + unanalyzedTerm);
                 this.termStats.add(new AnalyzedTermStats(field, unanalyzedTerm, docFreq, totalTermFreq));
             }
         }
@@ -130,6 +135,7 @@ public class ManagedTextField extends TextField implements ResourceLoaderAware {
     }
 
     public CollectionStatistics collectionStatistics(String field) {
+        log.info("Lookup stats for field:" + field + " stats cache len " + fieldStats.size());
         return fieldStats.get(field);
     }
 
