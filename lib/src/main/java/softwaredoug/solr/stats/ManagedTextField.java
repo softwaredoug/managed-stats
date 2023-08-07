@@ -33,7 +33,7 @@ public class ManagedTextField extends TextField implements ResourceLoaderAware {
         this.statsFile = args.remove("stats");
         this.termStats = new ArrayList<AnalyzedTermStats>();
         this.fieldStats = new HashMap<String, CollectionStatistics>();
-        
+
         this.override_all_fields = false;
         String override = args.remove("override");
         if (override != null) {
@@ -112,6 +112,10 @@ public class ManagedTextField extends TextField implements ResourceLoaderAware {
                 this.termStats.add(new AnalyzedTermStats(field, unanalyzedTerm, docFreq, totalTermFreq));
             }
         }
+    }
+
+    public boolean wantsToOverride() {
+        return this.override_all_fields;
     }
 
     public TermStatistics termStatistics(Term term) {
