@@ -36,7 +36,7 @@ public class ManagedTextField extends TextField implements ResourceLoaderAware {
         this.fieldStats = new HashMap<String, CollectionStatistics>();
 
         this.override_all_fields = false;
-        String override = args.get("override");
+        String override = args.remove("override");
         if (override != null) {
             this.override_all_fields = Boolean.valueOf(override);
         }

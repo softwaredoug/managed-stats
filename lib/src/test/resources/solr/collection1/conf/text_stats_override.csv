@@ -1,0 +1,26 @@
+# Contains a header with global term stats
+# field, maxDoc, docCount, sumTotalTermFreq, sumDocFreq
+#
+# Followed by a term stats field,term,docFreq,totalTermFreq.
+#
+# All terms will be analyzed by the field's index analyzer prior to being loaded.
+#
+fields
+text,10,11,13,13
+not_managed,50,51,52,52
+
+terms
+text,foo,2,8
+text,bar,1,4
+text,stopword,4,8
+text,UPPERCASE,3,8
+text,two terms,4,8
+text,comma,term,4,8
+
+# We hijack term stats for this field
+not_managed,burritos,10,20
+not_managed,tacos,11,21
+not_managed,nachos,12,22
+
+# Doc freq should not be higher that total term freq
+# impossible_doc_freq,60,50

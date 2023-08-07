@@ -15,7 +15,7 @@ public class ManagedStatsCacheTest extends SolrTestCaseJ4 {
     @Before
     public void setupStats() throws Exception {
         // All tests relative to this
-        initCore("solrconfig.xml", "schema.xml", "build/resources/test/solr");
+        initCore("solrconfig.xml", "schema_override.xml", "build/resources/test/solr");
 
         SolrCore core = this.h.getCore();
         IndexSchema schema = core.getLatestSchema();

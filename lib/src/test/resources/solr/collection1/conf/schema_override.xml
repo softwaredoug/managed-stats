@@ -36,7 +36,7 @@
     <fieldType name="date" class="${solr.tests.DateFieldType}" docValues="${solr.tests.numeric.dv}" precisionStep="0" positionIncrementGap="0"/>
     <fieldtype name="binary" class="solr.BinaryField"/>
 
-    <fieldType name="text_general" class="softwaredoug.solr.stats.ManagedTextField" override="true" stats="text_general_stats.csv" positionIncrementGap="100">
+    <fieldType name="text_general" class="softwaredoug.solr.stats.ManagedTextField" override="true" stats="text_stats_override.csv" positionIncrementGap="100">
       <analyzer type="index">
         <tokenizer class="solr.StandardTokenizerFactory"/>
         <filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords.txt"  />
