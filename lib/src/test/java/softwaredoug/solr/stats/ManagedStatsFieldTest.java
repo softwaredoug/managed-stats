@@ -44,7 +44,7 @@ public class ManagedStatsFieldTest extends SolrTestCaseJ4 {
 
     @Test
     public void testHasCollectionStats() {
-        CollectionStatistics stats = this.managedField.collectionStatistics("foo");
+        CollectionStatistics stats = this.managedField.collectionStatistics("text");
         assertEquals(stats.docCount(), 10);
         assertEquals(stats.maxDoc(), 11);
         assertEquals(stats.sumTotalTermFreq(), 13);

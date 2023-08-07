@@ -24,17 +24,16 @@ public class ManagedTextField extends TextField implements ResourceLoaderAware {
 
     private String statsFile;
     private boolean override_all_fields;
-    private long docCount;
-    private long maxDocs;
-    private long sumTotalTermFreq;
-    private long sumTotalDocFreq;
+
 
     private List<AnalyzedTermStats> termStats;  // field -> termStats
+    private HashMap<String, CollectionStatistics> fieldStats;
 
     @Override
     protected void init(IndexSchema schema, Map<String, String> args) {
         this.statsFile = args.remove("stats");
         this.termStats = new ArrayList<AnalyzedTermStats>();
+        this.fieldStats = new HashMap<String, CollectionStatistics>();
 
         this.override_all_fields = false;
         String override = args.get("override");
@@ -50,48 +49,69 @@ public class ManagedTextField extends TextField implements ResourceLoaderAware {
         final SolrResourceLoader solrResourceLoader = (SolrResourceLoader) loader;
         String typeName = getTypeName();
         Map<String, String> config = getNonFieldPropertyArgs();
+        String currField = "";
+        boolean fields = true;
 
         List<String> lines = solrResourceLoader.getLines(this.statsFile);
-        String globalStats = lines.remove(0);
-        String[] statsHeader = globalStats.split(",");
-        if (statsHeader.length != 4) {
-            throw new IllegalArgumentException("First line of stats should provide 4 total stats");
-        }
-        long[] stats = new long[4];
-        int idx = 0;
-        for (String globalStat : statsHeader) {
-            stats[idx] = Long.parseLong(globalStat);
-            idx++;
-        }
-        this.docCount = stats[0];
-        this.maxDocs = stats[1];
-        this.sumTotalTermFreq = stats[2];
-        this.sumTotalDocFreq = stats[3];
-
-        // Now for individual terms
-        String unanalyzedTerm = null;
-        String field = null;
-        long docFreq = 0;
-        long totalTermFreq = 0;
         for (String line : lines) {
-            String[] line_split = line.split(",");
-
-            if (line_split.length < 4) {
-                throw new IllegalArgumentException("Error at line: " + line +
-                        ": Managed stat row requires 3 comma separated values: term,docFreq,totalTermFreq");
+            if (line.equals("fields")) {
+                fields = true;
+                continue;
+            }
+            if (line.equals("terms")) {
+                fields = false;
+                continue;
             }
 
-            field = line_split[0];
-            docFreq = Long.parseLong(line_split[line_split.length-2]);
-            totalTermFreq = Long.parseLong(line_split[line_split.length-1]);
+            if (fields) {
+                String[] statsHeader = line.split(",");
+                if (statsHeader.length != 5) {
+                    throw new IllegalArgumentException("Field stats should provide field name plus 4 stats"
+                                                       + " you provided: " + line);
+                }
+                long[] stats = new long[4];
+                int idx = 0;
+                String fieldName = statsHeader[0];
+                for (String globalStat : statsHeader) {
+                    if (globalStat == fieldName) {
+                        continue;
+                    }
+                    stats[idx] = Long.parseLong(globalStat);
+                    idx++;
+                }
+                long docCount = stats[0];
+                long maxDocs = stats[1];
+                long sumTotalTermFreq = stats[2];
+                long sumTotalDocFreq = stats[3];
 
-            String[] remainder = Arrays.copyOfRange(line_split,1, line_split.length-2);
-            unanalyzedTerm = String.join(",", remainder);
-
-            if (docFreq > totalTermFreq) {
-                throw new IllegalArgumentException("Doc stats error at: <" + line + "> -- docFreq more than totalTermFreq not allowed");
+                fieldStats.put(fieldName,
+                                new CollectionStatistics(fieldName, maxDocs, docCount, sumTotalTermFreq, sumTotalDocFreq));
             }
-            this.termStats.add(new AnalyzedTermStats(field, unanalyzedTerm, docFreq, totalTermFreq));
+            else {
+                // Now for individual terms
+                String unanalyzedTerm = null;
+                String field = null;
+                long docFreq = 0;
+                long totalTermFreq = 0;
+                String[] line_split = line.split(",");
+
+                if (line_split.length < 4) {
+                    throw new IllegalArgumentException("Error at line: " + line +
+                            ": Managed stat row requires 3 comma separated values: term,docFreq,totalTermFreq");
+                }
+
+                field = line_split[0];
+                docFreq = Long.parseLong(line_split[line_split.length - 2]);
+                totalTermFreq = Long.parseLong(line_split[line_split.length - 1]);
+
+                String[] remainder = Arrays.copyOfRange(line_split, 1, line_split.length - 2);
+                unanalyzedTerm = String.join(",", remainder);
+
+                if (docFreq > totalTermFreq) {
+                    throw new IllegalArgumentException("Doc stats error at: <" + line + "> -- docFreq more than totalTermFreq not allowed");
+                }
+                this.termStats.add(new AnalyzedTermStats(field, unanalyzedTerm, docFreq, totalTermFreq));
+            }
         }
     }
 
@@ -107,7 +127,7 @@ public class ManagedTextField extends TextField implements ResourceLoaderAware {
     }
 
     public CollectionStatistics collectionStatistics(String field) {
-        return new CollectionStatistics(field, this.maxDocs, this.docCount, this.sumTotalTermFreq, this.sumTotalDocFreq);
+        return fieldStats.get(field);
     }
 
     @Override

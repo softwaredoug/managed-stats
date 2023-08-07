@@ -5,7 +5,10 @@
 #
 # All terms will be analyzed by the field's index analyzer prior to being loaded.
 #
-10,11,13,13
+fields
+text,10,11,13,13
+
+terms
 text,foo,2,8
 text,bar,1,4
 text,stopword,4,8
