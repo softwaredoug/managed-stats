@@ -72,16 +72,27 @@ public class ManagedStatsCacheTest extends SolrTestCaseJ4 {
                 "//lst[@name='explain']/str[@name='3' and contains(text(),\"10 = N, total number of documents with field\")]");
     }
 
+    public void testSearchNonManagedField() {
+        assertQ(
+                "search uses doc count",
+                req(
+                        "q", "burritos",
+                        "qf", "not_managed",
+                        "defType", "edismax",
+                        "debug", "true"),
+                "*[count(//doc)=1]");
+    }
+
 
     public void indexDocs() {
 
         assertU(adoc("id", "1",
                      "text", "Democratic Order op Planets"));
-        assertU(adoc("id", "2", "text", "Tool"
+        assertU(adoc("id", "2", "text", "Tool", "not_managed", "tacos"
                 ));
-        assertU(adoc("id", "3", "text", "foo"
+        assertU(adoc("id", "3", "text", "foo", "not_managed", "burritos"
         ));
-        assertU(adoc("id", "4", "text", "bar"
+        assertU(adoc("id", "4", "text", "bar", "not_managed", "nachos"
         ));
         assertU(commit());
     }

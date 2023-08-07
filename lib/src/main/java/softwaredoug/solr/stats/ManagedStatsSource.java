@@ -27,8 +27,11 @@ public class ManagedStatsSource extends StatsSource {
     }
 
     private ManagedTextField getAsManagedTextField(String field) {
-        SchemaField scheamField = this.schema.getField(field);
-        ManagedTextField fieldType = (ManagedTextField)scheamField.getType();
+        SchemaField schemaField = this.schema.getField(field);
+        ManagedTextField fieldType = null;
+        if (ManagedTextField.class.isInstance(schemaField.getType())) {
+            fieldType = (ManagedTextField) schemaField.getType();
+        }
         return fieldType;
     }
 
