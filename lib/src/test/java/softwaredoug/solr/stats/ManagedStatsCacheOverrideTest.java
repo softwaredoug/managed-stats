@@ -4,6 +4,7 @@ import org.apache.solr.SolrTestCaseJ4;
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.schema.FieldType;
 import org.apache.solr.schema.IndexSchema;
+import org.junit.After;
 import org.junit.Before;
 
 public class ManagedStatsCacheOverrideTest extends SolrTestCaseJ4 {
@@ -21,6 +22,11 @@ public class ManagedStatsCacheOverrideTest extends SolrTestCaseJ4 {
 
         indexDocs();
     }
+    @After
+    public void cleanup() {
+        deleteCore();
+    }
+
 
     public void testSearchNonManagedFieldIsNowActuallyManaged() {
         assertQ(
