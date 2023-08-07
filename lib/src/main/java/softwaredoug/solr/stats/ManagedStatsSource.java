@@ -4,16 +4,22 @@ import org.apache.lucene.index.Term;
 import org.apache.lucene.index.TermContext;
 import org.apache.lucene.search.CollectionStatistics;
 import org.apache.lucene.search.TermStatistics;
+import org.apache.solr.schema.FieldType;
 import org.apache.solr.schema.IndexSchema;
 import org.apache.solr.schema.SchemaField;
 import org.apache.solr.schema.TextField;
 import org.apache.solr.search.SolrIndexSearcher;
 import org.apache.solr.search.stats.StatsSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.lang.invoke.MethodHandles;
+import java.util.Map;
 
 public class ManagedStatsSource extends StatsSource {
 
+    private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
     private StatsSource fallback;
 
     private IndexSchema schema;
@@ -30,15 +36,21 @@ public class ManagedStatsSource extends StatsSource {
         ManagedTextField overrider = null;
         String overriderName = "";
         // Find any managed text field with override=true to use for all term freqs
-        for (String fieldName : this.schema.getFields().keySet()) {
-            ManagedTextField asManaged = fieldAsManagedTextField(fieldName);
-            if (asManaged != null && asManaged.wants_to_override_all_field_stats()) {
-                if (overrider != null) {
-                    throw new IllegalArgumentException("Only one fieldtype can set to override all text field stats. " +
-                        "you have set both " + fieldName + " and " + overriderName + " please only specify one");
+        for (Map.Entry<String, FieldType> entry : this.schema.getFieldTypes().entrySet()) {
+            if (entry.getValue() instanceof ManagedTextField) {
+                ManagedTextField asManaged = (ManagedTextField)(entry.getValue());
+                String fieldTypeName = entry.getKey();
+                log.info("Is ManagedTextField? checking field type: " + fieldTypeName);
+
+                if (asManaged != null && asManaged.wants_to_override_all_field_stats()) {
+                    if (overrider != null) {
+                        throw new IllegalArgumentException("Only one fieldtype can set to override all text field stats. " +
+                                "you have set both " + fieldTypeName + " and " + overriderName + " please only specify one");
+                    }
+                    overrider = asManaged;
+                    overriderName = fieldTypeName;
+                    log.info("ManagedStatsCache overrider is :" + fieldTypeName);
                 }
-                overrider = asManaged;
-                overriderName = fieldName;
             }
         }
         return overrider;
@@ -58,11 +70,14 @@ public class ManagedStatsSource extends StatsSource {
         // always prefer direct one
         ManagedTextField directConversion = fieldAsManagedTextField(field);
         if (directConversion != null) {
+            log.info("Using direct conversion for field: " + field);
             return directConversion;
         }
         if (override != null && schemaField.getType() instanceof TextField) {
+            log.info("Returning override for field " + field + " override is " + override.getTypeName());
             return override;
         }
+        log.info("No managed text field available in schema, skipping");
         return null;
     }
 
@@ -76,6 +91,7 @@ public class ManagedStatsSource extends StatsSource {
         if (termStats == null) {
             termStats = this.fallback.termStatistics(localSearcher, term, context);
         }
+        log.info("Found stats for term for term :" + term.text());
         return termStats;
     }
 

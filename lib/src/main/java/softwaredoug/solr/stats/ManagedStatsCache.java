@@ -23,6 +23,7 @@ public class ManagedStatsCache extends LocalStatsCache {
 
     public ManagedStatsCache() {
         super();
+        log.info("Using ManagedStatsCache");
     }
 
     @Override
