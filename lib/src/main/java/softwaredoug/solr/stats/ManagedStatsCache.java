@@ -25,12 +25,11 @@ public class ManagedStatsCache extends LocalStatsCache {
 
     public ManagedStatsCache() {
         super();
-        log.info("Using ManagedStatsCache");
+        log.info("Loading ManagedStatsCache");
     }
 
     @Override
     protected StatsSource doGet(SolrQueryRequest req) {
-        log.debug("## GET {}", req);
         StatsSource fallback = new LocalStatsSource(statsCacheMetrics);
         return new ManagedStatsSource(fallback, statsCacheMetrics, req.getSchema());
     }
@@ -38,7 +37,6 @@ public class ManagedStatsCache extends LocalStatsCache {
     // by returning null we don't create additional round-trip request.
     @Override
     protected ShardRequest doRetrieveStatsRequest(ResponseBuilder rb) {
-        log.debug("## RSR {}", rb.req);
         // already incremented the stats - decrement it now
         statsCacheMetrics.retrieveStats.decrement();
         return null;
@@ -47,9 +45,7 @@ public class ManagedStatsCache extends LocalStatsCache {
     @Override
     protected void doMergeToGlobalStats(SolrQueryRequest req, List<ShardResponse> responses) {
         if (log.isDebugEnabled()) {
-            log.debug("## MTGS {}", req);
             for (ShardResponse r : responses) {
-                log.debug(" - {}", r);
             }
         }
     }

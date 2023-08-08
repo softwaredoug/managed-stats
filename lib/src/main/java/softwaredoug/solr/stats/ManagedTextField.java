@@ -86,7 +86,7 @@ public class ManagedTextField extends TextField implements ResourceLoaderAware {
                 long maxDocs = stats[1];
                 long sumTotalTermFreq = stats[2];
                 long sumTotalDocFreq = stats[3];
-                log.info("Tracking global stats for field:" + fieldName);
+                log.info("Loaded global stats for field: {} ", fieldName);
                 fieldStats.put(fieldName,
                                 new CollectionStatistics(fieldName, maxDocs, docCount, sumTotalTermFreq, sumTotalDocFreq));
             }
@@ -113,10 +113,13 @@ public class ManagedTextField extends TextField implements ResourceLoaderAware {
                 if (docFreq > totalTermFreq) {
                     throw new IllegalArgumentException("Doc stats error at: <" + line + "> -- docFreq more than totalTermFreq not allowed");
                 }
-                log.trace("Tracking term stats for field:" + field + " term:" + unanalyzedTerm);
+                log.debug("Loaded term stats for field: {} term: {}", field, unanalyzedTerm);
                 this.termStats.add(new AnalyzedTermStats(field, unanalyzedTerm, docFreq, totalTermFreq));
             }
         }
+
+        log.info("ManagedTextField created. Storing stats for {} fields; {} terms",
+                 this.fieldStats.size(), this.termStats.size());
     }
 
     public boolean wantsToOverride() {
@@ -124,6 +127,8 @@ public class ManagedTextField extends TextField implements ResourceLoaderAware {
     }
 
     public TermStatistics termStatistics(Term term) {
+        log.trace("Lookup stats for term: {}", term.text());
+
         // slow for correctness, very bad to do this here
         for (AnalyzedTermStats stats: this.termStats) {
             TermStatistics thisStat = stats.getStats(term.field(), this.getIndexAnalyzer());
@@ -135,7 +140,7 @@ public class ManagedTextField extends TextField implements ResourceLoaderAware {
     }
 
     public CollectionStatistics collectionStatistics(String field) {
-        log.info("Lookup stats for field:" + field + " stats cache len " + fieldStats.size());
+        log.trace("Lookup stats for field: {} fieldStats len: {}", field, fieldStats.size());
         return fieldStats.get(field);
     }
 
