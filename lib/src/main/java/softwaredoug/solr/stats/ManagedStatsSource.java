@@ -87,7 +87,7 @@ public class ManagedStatsSource extends StatsSource {
 
     @Override
     public TermStatistics termStatistics(SolrIndexSearcher localSearcher, Term term, int docFreq, long totalTermFreq) throws IOException {
-        ManagedTextField fieldType = this.fieldAsManagedTextField(term.field());
+        ManagedTextField fieldType = this.getBestManagedTextField(term.field());
         if (fieldType == null) {
             return this.fallback.termStatistics(localSearcher, term, docFreq, totalTermFreq);
         }
