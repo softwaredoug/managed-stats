@@ -35,7 +35,7 @@ public class ManagedStatsCacheUnusedOverrideTest extends SolrTestCaseJ4 {
                         "qf", "not_managed",
                         "defType", "edismax",
                         "debug", "true"),
-                "//lst[@name='explain']/str[@name='3' and contains(text(),\"10.0 = docFreq\")]");
+                "//lst[@name='explain']/str[@name='3' and contains(text(),\"10 = n, number of documents containing term\")]");
 
     }
 
@@ -47,7 +47,7 @@ public class ManagedStatsCacheUnusedOverrideTest extends SolrTestCaseJ4 {
                         "qf", "not_managed",
                         "defType", "edismax",
                         "debug", "true"),
-                "//lst[@name='explain']/str[@name='3' and contains(text(),\"50.0 = docCount\")]");
+                "//lst[@name='explain']/str[@name='3' and contains(text(),\"50 = N, total number of documents with field\")]");
 
     }
 

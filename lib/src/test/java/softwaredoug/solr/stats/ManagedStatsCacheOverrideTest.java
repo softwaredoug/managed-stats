@@ -36,7 +36,7 @@ public class ManagedStatsCacheOverrideTest extends SolrTestCaseJ4 {
                         "qf", "not_managed",
                         "defType", "edismax",
                         "debug", "true"),
-                "//lst[@name='explain']/str[@name='3' and contains(text(),\"10.0 = docFreq\")]");
+                "//lst[@name='explain']/str[@name='3' and contains(text(),\"10 = n, number of documents containing term\")]");
 
     }
 
