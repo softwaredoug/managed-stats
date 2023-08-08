@@ -40,7 +40,7 @@ public class ManagedStatsSource extends StatsSource {
             if (entry.getValue() instanceof ManagedTextField) {
                 ManagedTextField asManaged = (ManagedTextField)(entry.getValue());
                 String fieldTypeName = entry.getKey();
-                log.info("Is ManagedTextField? checking field type: " + fieldTypeName);
+                log.trace("Is ManagedTextField? checking field type: {}", fieldTypeName);
 
                 if (asManaged != null && asManaged.wants_to_override_all_field_stats()) {
                     if (overrider != null) {
@@ -49,7 +49,7 @@ public class ManagedStatsSource extends StatsSource {
                     }
                     overrider = asManaged;
                     overriderName = fieldTypeName;
-                    log.info("ManagedStatsCache overrider is :" + fieldTypeName);
+                    log.info("ManagedStatsCache overrider is : {}", fieldTypeName);
                 }
             }
         }
@@ -70,14 +70,14 @@ public class ManagedStatsSource extends StatsSource {
         // always prefer direct one
         ManagedTextField directConversion = fieldAsManagedTextField(field);
         if (directConversion != null) {
-            log.info("Using direct conversion for field: " + field);
+            log.trace("Using direct conversion for field: {}", field);
             return directConversion;
         }
         if (override != null && schemaField.getType() instanceof TextField) {
-            log.info("Returning override for field " + field + " override is " + override.getTypeName());
+            log.trace("Returning override for field: {} override is: {}", override, override.getTypeName());
             return override;
         }
-        log.info("No managed text field available in schema, skipping");
+        log.trace("No managed text field available in schema, skipping");
         return null;
     }
 
@@ -85,15 +85,15 @@ public class ManagedStatsSource extends StatsSource {
     public TermStatistics termStatistics(SolrIndexSearcher localSearcher, Term term, TermContext context) throws IOException {
         ManagedTextField fieldType = this.getBestManagedTextField(term.field());
         if (fieldType == null) {
-            log.info("Falling back(1) for term:" + term.text());
+            log.trace("Falling back: No ManagedTextField for field: {} term: {}", term.field(), term.text());
             return this.fallback.termStatistics(localSearcher, term, context);
         }
         TermStatistics termStats = fieldType.termStatistics(term);
         if (termStats == null) {
-            log.info("Falling back(2) for term:" + term.text());
+            log.trace("Falling back: No termStats in managed field for field: {} term: {}", term.field(), term.text());
             return this.fallback.termStatistics(localSearcher, term, context);
         }
-        log.info("Found stats for term:" + term.text());
+        log.trace("Found stats for field:{}, term:{} ", term.field(), term.text());
         return termStats;
     }
 
@@ -101,10 +101,10 @@ public class ManagedStatsSource extends StatsSource {
     public CollectionStatistics collectionStatistics(SolrIndexSearcher localSearcher, String field) throws IOException {
         ManagedTextField fieldType = this.getBestManagedTextField(field);
         if (fieldType == null) {
-            log.info("Falling back for field:" + field);
+            log.trace("Falling back for field: {}", field);
             return this.fallback.collectionStatistics(localSearcher, field);
         }
-        log.info("Found stats for field:" + field);
+        log.trace("Found global stats for field: {}", field);
         return fieldType.collectionStatistics(field);
     }
 }
