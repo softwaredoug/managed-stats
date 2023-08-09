@@ -3,6 +3,7 @@
  */
 package softwaredoug.solr.stats;
 
+import org.apache.solr.core.PluginInfo;
 import org.apache.solr.handler.component.ResponseBuilder;
 import org.apache.solr.handler.component.ShardRequest;
 import org.apache.solr.handler.component.ShardResponse;
@@ -39,5 +40,36 @@ public class ManagedStatsCache extends LocalStatsCache {
         return null;
     }
 
+    @Override
+    public void init(PluginInfo info) {
+    }
+
+    // by returning null we don't create additional round-trip request.
+
+    @Override
+    public void mergeToGlobalStats(SolrQueryRequest req,
+                                   List<ShardResponse> responses) {
+        if (log.isDebugEnabled()) {
+            log.debug("## MTGD {}", req);
+            for (ShardResponse r : responses) {
+                log.debug(" - {}", r);
+            }
+        }
+    }
+
+    @Override
+    public void returnLocalStats(ResponseBuilder rb, SolrIndexSearcher searcher) {
+        log.debug("## RLD {}", rb.req);
+    }
+
+    @Override
+    public void receiveGlobalStats(SolrQueryRequest req) {
+        log.debug("## RGD {}", req);
+    }
+
+    @Override
+    public void sendGlobalStats(ResponseBuilder rb, ShardRequest outgoing) {
+        log.debug("## SGD {}", outgoing);
+    }
 }
 

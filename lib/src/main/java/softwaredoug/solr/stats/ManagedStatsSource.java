@@ -84,16 +84,17 @@ public class ManagedStatsSource extends StatsSource {
     @Override
     public TermStatistics termStatistics(SolrIndexSearcher localSearcher, Term term, TermContext context) throws IOException {
         ManagedTextField fieldType = this.getBestManagedTextField(term.field());
+        TermStatistics termStats = null;
         if (fieldType == null) {
             log.trace("Falling back: No ManagedTextField for field: {} term: {}", term.field(), term.text());
             return this.fallback.termStatistics(localSearcher, term, context);
         }
-        TermStatistics termStats = fieldType.termStatistics(term);
+        termStats = fieldType.termStatistics(term);
         if (termStats == null) {
             log.trace("Falling back: No termStats in managed field for field: {} term: {}", term.field(), term.text());
             return this.fallback.termStatistics(localSearcher, term, context);
         }
-        log.trace("Found stats for field:{}, term:{} ", term.field(), term.text());
+        log.trace("Found manual stats for field:{}, term:{} ", term.field(), term.text());
         return termStats;
     }
 
@@ -101,10 +102,15 @@ public class ManagedStatsSource extends StatsSource {
     public CollectionStatistics collectionStatistics(SolrIndexSearcher localSearcher, String field) throws IOException {
         ManagedTextField fieldType = this.getBestManagedTextField(field);
         if (fieldType == null) {
-            log.trace("Falling back for field: {}", field);
+            log.trace("Falling back -- no ManagedTextField -- for field: {}", field);
             return this.fallback.collectionStatistics(localSearcher, field);
         }
-        log.trace("Found global stats for field: {}", field);
-        return fieldType.collectionStatistics(field);
+        CollectionStatistics rVal = fieldType.collectionStatistics(field);
+        if (rVal == null) {
+            log.trace("Falling back -- ManagedTextField -- does not track: {}", field);
+            return this.fallback.collectionStatistics(localSearcher, field);
+        }
+        log.trace("Found manual stats for field: {}", field);
+        return rVal;
     }
 }
