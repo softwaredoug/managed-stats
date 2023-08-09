@@ -3,6 +3,7 @@
  */
 package softwaredoug.solr.stats;
 
+import org.apache.solr.core.PluginInfo;
 import org.apache.solr.handler.component.ResponseBuilder;
 import org.apache.solr.handler.component.ShardRequest;
 import org.apache.solr.handler.component.ShardResponse;
@@ -64,6 +65,7 @@ public class ManagedStatsCache extends LocalStatsCache {
     protected void doSendGlobalStats(ResponseBuilder rb, ShardRequest outgoing) {
         log.debug("## SGS {}", outgoing);
     }
+
 
 }
 
