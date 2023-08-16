@@ -34,10 +34,14 @@ The CSV for the field stats.
 #
 # All terms will be analyzed by the field's index analyzer prior to being loaded.
 #
-10,11,13,13
-foo,2,8
-bar,1,4
-stopword,4,8
-UPPERCASE,3,8
-two terms,4,8
+fields
+text,10,11,13,13
+
+terms
+text,foo,2,8
+text,bar,1,4
+text,stopword,4,8
+text,UPPERCASE,3,8
+text,two terms,4,8
+text,comma,term,4,8
 ```
