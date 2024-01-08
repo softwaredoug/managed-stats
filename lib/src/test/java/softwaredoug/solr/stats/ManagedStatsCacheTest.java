@@ -58,7 +58,7 @@ public class ManagedStatsCacheTest extends SolrTestCaseJ4 {
                         "qf", "text",
                         "defType", "edismax",
                         "debug", "true"),
-                "//lst[@name='explain']/str[@name='3' and contains(text(),\"2.0 = docFreq\")]");
+                "//lst[@name='explain']/str[@name='3' and contains(text(),\"2 = n, number of documents containing term\")]");
     }
 
     public void testSearchManagedTermUsesCorrectDocCount() {
@@ -69,7 +69,7 @@ public class ManagedStatsCacheTest extends SolrTestCaseJ4 {
                         "qf", "text",
                         "defType", "edismax",
                         "debug", "true"),
-                "//lst[@name='explain']/str[@name='3' and contains(text(),\"10.0 = docCount\")]");
+                "//lst[@name='explain']/str[@name='3' and contains(text(),\"10 = N, total number of documents with field\")]");
     }
 
     public void testSearchNonManagedField() {
