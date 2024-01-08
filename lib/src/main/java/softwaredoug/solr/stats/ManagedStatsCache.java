@@ -47,26 +47,27 @@ public class ManagedStatsCache extends LocalStatsCache {
     // by returning null we don't create additional round-trip request.
 
     @Override
-    public void mergeToGlobalStats(SolrQueryRequest req,
-                                   List<ShardResponse> responses) {
+    protected void doMergeToGlobalStats(SolrQueryRequest req, List<ShardResponse> responses) {
         if (log.isDebugEnabled()) {
-            log.debug("## MTGD {}", req);
+            log.debug("## MTGS {}", req);
+            for (ShardResponse r : responses) {
+                log.debug(" - {}", r);
+            }
         }
     }
-
     @Override
-    public void returnLocalStats(ResponseBuilder rb, SolrIndexSearcher searcher) {
-        log.debug("## RLD {}", rb.req);
+    protected void doReturnLocalStats(ResponseBuilder rb, SolrIndexSearcher searcher) {
+        log.debug("## RLS {}", rb.req);
     }
 
     @Override
-    public void receiveGlobalStats(SolrQueryRequest req) {
-        log.debug("## RGD {}", req);
+    protected void doReceiveGlobalStats(SolrQueryRequest req) {
+        log.debug("## RGS {}", req);
     }
 
     @Override
-    public void sendGlobalStats(ResponseBuilder rb, ShardRequest outgoing) {
-        log.debug("## SGD {}", outgoing);
+    protected void doSendGlobalStats(ResponseBuilder rb, ShardRequest outgoing) {
+        log.debug("## SGS {}", outgoing);
     }
 }
 
