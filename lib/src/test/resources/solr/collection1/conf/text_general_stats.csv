@@ -2,8 +2,7 @@
 #
 # field, docCount, maxDocs, sumTotalTermFreq, sumDocFreq
 #
-#
-# Followed by a term stats for this field.
+# Followed by a term stats field,term,docFreq,totalTermFreq.
 #
 # All terms will be analyzed by the field's index analyzer prior to being loaded.
 #

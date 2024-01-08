@@ -3,19 +3,18 @@ package softwaredoug.solr.stats;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.tokenattributes.TermToBytesRefAttribute;
+import org.apache.lucene.util.ResourceLoader;
+import org.apache.lucene.util.ResourceLoaderAware;
 import org.apache.lucene.index.IndexableField;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.CollectionStatistics;
 import org.apache.lucene.search.TermStatistics;
 import org.apache.lucene.util.BytesRef;
-import org.apache.lucene.util.ResourceLoader;
-import org.apache.lucene.util.ResourceLoaderAware;
+
 import org.apache.solr.core.SolrResourceLoader;
 import org.apache.solr.schema.IndexSchema;
 import org.apache.solr.schema.SchemaField;
 import org.apache.solr.schema.TextField;
-import org.apache.solr.search.stats.CollectionStats;
-import org.apache.solr.search.stats.TermStats;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -132,7 +131,7 @@ public class ManagedTextField extends TextField implements ResourceLoaderAware {
         // slow for correctness, very bad to do this here
         for (AnalyzedTermStats stats: this.termStats) {
             TermStatistics thisStat = stats.getStats(term.field(), this.getIndexAnalyzer());
-            if (thisStat != null && thisStat.term().equals(term.bytes())) {
+            if (thisStat != null && thisStat.term().equals(term.bytes()) && term.field().equals(stats.getField())) {
                 return thisStat;
             }
         }
@@ -149,6 +148,10 @@ public class ManagedTextField extends TextField implements ResourceLoaderAware {
         return super.createField(field, value);
     }
 
+    public boolean wants_to_override_all_field_stats() {
+        return this.override_all_fields;
+    }
+
     // TermStats read at the FieldType level before a field is created
     public static class AnalyzedTermStats {
 
@@ -163,13 +166,17 @@ public class ManagedTextField extends TextField implements ResourceLoaderAware {
             this.field = field;
             this.docFreq = docFreq;
             this.totalTermFreq = totalTermFreq;
+            this.field = field;
         }
 
         public Term getTerm(String field, Analyzer indexAnalyzer) {
+            if (!field.equals(this.field)) {
+                return null;
+            }
+
             if (this.analyzedTerm != null) {
                 return new Term(field, this.analyzedTerm);
-            }
-            else {
+            } else {
                 try (TokenStream source = indexAnalyzer.tokenStream(field, this.unanalyzedTerm)) {
                     source.reset();
                     TermToBytesRefAttribute termAtt = source.getAttribute(TermToBytesRefAttribute.class);
@@ -187,8 +194,11 @@ public class ManagedTextField extends TextField implements ResourceLoaderAware {
                     throw new RuntimeException(e);
                 }
             }
+        }
 
-        };
+        public String getField() {
+            return this.field;
+        }
 
         public TermStatistics getStats(String field, Analyzer indexAnalyzer) {
             Term term = this.getTerm(field, indexAnalyzer);
@@ -197,5 +207,6 @@ public class ManagedTextField extends TextField implements ResourceLoaderAware {
             }
             return null;
         }
+
     }
 }

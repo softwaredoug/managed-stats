@@ -21,8 +21,6 @@ import java.util.List;
 
 public class ManagedStatsCache extends LocalStatsCache {
     private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-    private ManagedStats stats;
-
 
     public ManagedStatsCache() {
         super();
@@ -32,40 +30,43 @@ public class ManagedStatsCache extends LocalStatsCache {
     @Override
     protected StatsSource doGet(SolrQueryRequest req) {
         StatsSource fallback = new LocalStatsSource(statsCacheMetrics);
-        return new ManagedStatsSource(fallback, statsCacheMetrics, req.getSchema());
+        return new ManagedStatsSource(fallback, req.getSchema());
     }
 
     // by returning null we don't create additional round-trip request.
     @Override
     protected ShardRequest doRetrieveStatsRequest(ResponseBuilder rb) {
         // already incremented the stats - decrement it now
-        statsCacheMetrics.retrieveStats.decrement();
         return null;
     }
 
     @Override
-    protected void doMergeToGlobalStats(SolrQueryRequest req, List<ShardResponse> responses) {
+    public void init(PluginInfo info) {
+    }
+
+    // by returning null we don't create additional round-trip request.
+
+    @Override
+    public void mergeToGlobalStats(SolrQueryRequest req,
+                                   List<ShardResponse> responses) {
         if (log.isDebugEnabled()) {
-            for (ShardResponse r : responses) {
-            }
+            log.debug("## MTGD {}", req);
         }
     }
 
     @Override
-    protected void doReturnLocalStats(ResponseBuilder rb, SolrIndexSearcher searcher) {
-        log.debug("## RLS {}", rb.req);
+    public void returnLocalStats(ResponseBuilder rb, SolrIndexSearcher searcher) {
+        log.debug("## RLD {}", rb.req);
     }
 
     @Override
-    protected void doReceiveGlobalStats(SolrQueryRequest req) {
-        log.debug("## RGS {}", req);
+    public void receiveGlobalStats(SolrQueryRequest req) {
+        log.debug("## RGD {}", req);
     }
 
     @Override
-    protected void doSendGlobalStats(ResponseBuilder rb, ShardRequest outgoing) {
-        log.debug("## SGS {}", outgoing);
+    public void sendGlobalStats(ResponseBuilder rb, ShardRequest outgoing) {
+        log.debug("## SGD {}", outgoing);
     }
-
-
 }
 

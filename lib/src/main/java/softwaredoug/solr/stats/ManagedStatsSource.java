@@ -8,8 +8,6 @@ import org.apache.solr.schema.IndexSchema;
 import org.apache.solr.schema.SchemaField;
 import org.apache.solr.schema.TextField;
 import org.apache.solr.search.SolrIndexSearcher;
-import org.apache.solr.search.stats.LocalStatsSource;
-import org.apache.solr.search.stats.StatsCache;
 import org.apache.solr.search.stats.StatsSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,8 +18,6 @@ import java.util.Map;
 
 public class ManagedStatsSource extends StatsSource {
 
-    private final StatsCache.StatsCacheMetrics metrics;
-
     private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
     private StatsSource fallback;
 
@@ -29,9 +25,8 @@ public class ManagedStatsSource extends StatsSource {
 
     private ManagedTextField override;
 
-    public ManagedStatsSource(StatsSource fallback, StatsCache.StatsCacheMetrics metrics, IndexSchema schema) {
+    public ManagedStatsSource(StatsSource fallback, IndexSchema schema) {
         this.fallback = fallback;
-        this.metrics = metrics;
         this.schema = schema;
         this.override = getManagedTextFieldOverride();
     }
@@ -46,7 +41,7 @@ public class ManagedStatsSource extends StatsSource {
                 String fieldTypeName = entry.getKey();
                 log.trace("Is ManagedTextField? checking field type: {}", fieldTypeName);
 
-                if (asManaged != null && asManaged.wantsToOverride()) {
+                if (asManaged != null && asManaged.wants_to_override_all_field_stats()) {
                     if (overrider != null) {
                         throw new IllegalArgumentException("Only one fieldtype can set to override all text field stats. " +
                                 "you have set both " + fieldTypeName + " and " + overriderName + " please only specify one");
