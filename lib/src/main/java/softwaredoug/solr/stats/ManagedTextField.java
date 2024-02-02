@@ -127,7 +127,11 @@ public class ManagedTextField extends TextField implements ResourceLoaderAware {
     }
 
     public TermStatistics termStatistics(Term term, Analyzer indexAnalyzer) {
-        log.trace("Lookup stats for term: {} -- Analyzer {}", term.text(), indexAnalyzer.toString());
+        if (indexAnalyzer != null) {
+            log.trace("Lookup stats for term: {} -- Analyzer {}", term.text(), indexAnalyzer.toString());
+        } else {
+            log.trace("Lookup stats for term: {} -- Analyzer NULL", term.text());
+        }
 
         if (indexAnalyzer == null) {
             indexAnalyzer = this.getIndexAnalyzer();
