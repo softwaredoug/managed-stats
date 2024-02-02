@@ -41,6 +41,55 @@ public class ManagedStatsCacheOverrideTest extends SolrTestCaseJ4 {
     }
 
 
+    public void testSearchManagedUsesManagedFieldsAnalyzer() {
+        /* Check for these overrides:
+        text_stem,cat,1,2
+        text_stem,cats,3,4      # Most stemmed preferred, this is ignored
+        text_stem,policy,5,9
+         */
+        assertQ(
+                "search uses doc count",
+                req(
+                        "q", "cat",
+                        "qf", "text_stem",
+                        "defType", "edismax",
+                        "debug", "true"),
+                "//lst[@name='explain']/str[@name='4' and contains(text(),\"1 = n, number of documents containing term\")]");
+
+        assertQ(
+                "search uses doc count",
+                req(
+                        "q", "cats",
+                        "qf", "text_stem",
+                        "defType", "edismax",
+                        "debug", "true"),
+                "//lst[@name='explain']/str[@name='4' and contains(text(),\"1 = n, number of documents containing term\")]");
+
+
+    }
+
+    public void testSearchManagedUsesManagedFieldsStemmedOrigTerm() {
+        assertQ(
+                "search uses doc count",
+                req(
+                        "q", "policy",
+                        "qf", "text_stem",
+                        "defType", "edismax",
+                        "debug", "true"),
+                "//lst[@name='explain']/str[@name='4' and contains(text(),\"5 = n, number of documents containing term\")]");
+    }
+    public void testSearchManagedUsesManagedFieldsStemmedTerm() {
+        assertQ(
+                "search uses doc count",
+                req(
+                        "q", "policies",
+                        "qf", "text_stem",
+                        "defType", "edismax",
+                        "debug", "true"),
+                "//lst[@name='explain']/str[@name='4' and contains(text(),\"5 = n, number of documents containing term\")]");
+    }
+
+
     public void indexDocs() {
 
         assertU(adoc("id", "1",
@@ -50,6 +99,8 @@ public class ManagedStatsCacheOverrideTest extends SolrTestCaseJ4 {
         assertU(adoc("id", "3", "text", "foo", "not_managed", "burritos"
         ));
         assertU(adoc("id", "4", "text", "bar", "not_managed", "nachos"
+        ));
+        assertU(adoc("id", "4", "text", "policy cat cats", "not_managed", "nachos"
         ));
         assertU(commit());
     }

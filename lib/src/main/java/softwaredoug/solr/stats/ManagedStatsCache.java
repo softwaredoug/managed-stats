@@ -24,7 +24,16 @@ public class ManagedStatsCache extends LocalStatsCache {
 
     public ManagedStatsCache() {
         super();
-        log.info("Loading ManagedStatsCache");
+        log.warn("************************************************************");
+        log.warn("!!## ManagedStatsCache being used - this is for testing only");
+        log.warn("");
+        log.warn("");
+        log.warn("");
+        log.warn("");
+        log.warn("");
+        log.warn("");
+        log.warn("");
+        log.warn("************************************************************");
     }
 
     @Override

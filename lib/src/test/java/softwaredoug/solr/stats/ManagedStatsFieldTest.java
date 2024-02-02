@@ -55,7 +55,7 @@ public class ManagedStatsFieldTest extends SolrTestCaseJ4 {
     public void testGetsStatsForField() {
         BytesRef text = new BytesRef("foo".getBytes());
         Term term = new Term("text", text);
-        TermStatistics termStats = this.managedField.termStatistics(term);
+        TermStatistics termStats = this.managedField.termStatistics(term, null);
 
         assertNotNull(termStats);
         assertEquals(term.bytes(), termStats.term());
@@ -67,7 +67,7 @@ public class ManagedStatsFieldTest extends SolrTestCaseJ4 {
     public void testTextAnalyzed() {
         BytesRef text = new BytesRef("uppercase".getBytes());
         Term term = new Term("text", text);
-        TermStatistics termStats = this.managedField.termStatistics(term);
+        TermStatistics termStats = this.managedField.termStatistics(term, null);
         assertNotNull(termStats);
     }
 
@@ -75,7 +75,7 @@ public class ManagedStatsFieldTest extends SolrTestCaseJ4 {
     public void testGetsNoStatsIfNoTermProduced() {
         BytesRef text = new BytesRef("stopword".getBytes());
         Term term = new Term("text", text);
-        TermStatistics termStats = this.managedField.termStatistics(term);
+        TermStatistics termStats = this.managedField.termStatistics(term, null);
         assertNull(termStats);
     }
 
@@ -83,7 +83,7 @@ public class ManagedStatsFieldTest extends SolrTestCaseJ4 {
     public void testAnalyzesToMultipleTermsIgnored() {
         BytesRef text = new BytesRef("two terms".getBytes());
         Term term = new Term("text", text);
-        TermStatistics termStats = this.managedField.termStatistics(term);
+        TermStatistics termStats = this.managedField.termStatistics(term, null);
         assertNull(termStats);
     }
 
@@ -91,7 +91,7 @@ public class ManagedStatsFieldTest extends SolrTestCaseJ4 {
     public void testAnalyzesCommaTermsCorrectly() {
         BytesRef text = new BytesRef("comma,term".getBytes());
         Term term = new Term("text", text);
-        TermStatistics termStats = this.managedField.termStatistics(term);
+        TermStatistics termStats = this.managedField.termStatistics(term, null);
         assertNull(termStats);
     }
 }
