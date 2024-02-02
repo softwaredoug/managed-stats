@@ -1,5 +1,6 @@
 package softwaredoug.solr.stats;
 
+import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.CollectionStatistics;
 import org.apache.lucene.search.TermStatistics;
@@ -80,6 +81,16 @@ public class ManagedStatsSource extends StatsSource {
         return null;
     }
 
+    private Analyzer getBestIndexAnalyzer(String field) {
+        SchemaField schemaField = this.schema.getField(field);
+        if (override != null && schemaField.getType() instanceof TextField) {
+            return schemaField.getType().getIndexAnalyzer();
+        } else {
+            ManagedTextField converted = getBestManagedTextField(field);
+            return converted.getIndexAnalyzer();
+        }
+    }
+
     @Override
     public TermStatistics termStatistics(SolrIndexSearcher localSearcher, Term term, int docFreq, long totalTermFreq) throws IOException {
         ManagedTextField fieldType = this.getBestManagedTextField(term.field());
@@ -88,7 +99,8 @@ public class ManagedStatsSource extends StatsSource {
             log.trace("Falling back: No ManagedTextField for field: {} term: {}", term.field(), term.text());
             return this.fallback.termStatistics(localSearcher, term, docFreq, totalTermFreq);
         }
-        termStats = fieldType.termStatistics(term);
+        Analyzer indexAnalyzer = getBestIndexAnalyzer(term.field());
+        termStats = fieldType.termStatistics(term, indexAnalyzer);
         if (termStats == null) {
             termStats = this.fallback.termStatistics(localSearcher, term, docFreq, totalTermFreq);
             log.trace("Falling back: No termStats in managed field for field: {} term: {}", term.field(), term.text());

@@ -85,7 +85,8 @@ public class ManagedTextField extends TextField implements ResourceLoaderAware {
                 long maxDocs = stats[1];
                 long sumTotalTermFreq = stats[2];
                 long sumTotalDocFreq = stats[3];
-                log.info("Loaded global stats for field: {} ", fieldName);
+                log.warn("*****************************************");
+                log.warn("USING MANAGED STATS FOR: {} ", fieldName);
                 fieldStats.put(fieldName,
                                 new CollectionStatistics(fieldName, maxDocs, docCount, sumTotalTermFreq, sumTotalDocFreq));
             }
@@ -125,12 +126,16 @@ public class ManagedTextField extends TextField implements ResourceLoaderAware {
         return this.override_all_fields;
     }
 
-    public TermStatistics termStatistics(Term term) {
+    public TermStatistics termStatistics(Term term, Analyzer indexAnalyzer) {
         log.trace("Lookup stats for term: {}", term.text());
+
+        if (indexAnalyzer == null) {
+            indexAnalyzer = this.getIndexAnalyzer();
+        }
 
         // slow for correctness, very bad to do this here
         for (AnalyzedTermStats stats: this.termStats) {
-            TermStatistics thisStat = stats.getStats(term.field(), this.getIndexAnalyzer());
+            TermStatistics thisStat = stats.getStats(term.field(), indexAnalyzer);
             if (thisStat != null && thisStat.term().equals(term.bytes()) && term.field().equals(stats.getField())) {
                 return thisStat;
             }

@@ -7,6 +7,7 @@
 #
 fields
 text,10,11,13,13
+text_stem,10,11,13,13
 not_managed,50,51,52,52
 
 terms
@@ -24,3 +25,7 @@ not_managed,nachos,12,22
 
 # Doc freq should not be higher that total term freq
 # impossible_doc_freq,60,50
+
+text_stem,cat,1,2
+text_stem,cats,3,4
+text_stem,policy,5,9
