@@ -89,6 +89,39 @@ public class ManagedStatsCacheOverrideTest extends SolrTestCaseJ4 {
                 "//lst[@name='explain']/str[@name='4' and contains(text(),\"5 = n, number of documents containing term\")]");
     }
 
+    public void testSearchManagedUsesManagedFieldsStemmedTermFromOrig() {
+        assertQ(
+                "search uses doc count",
+                req(
+                        "q", "policy",
+                        "qf", "text_stem",
+                        "defType", "edismax",
+                        "debug", "true"),
+                "//lst[@name='explain']/str[@name='4' and contains(text(),\"5 = n, number of documents containing term\")]");
+    }
+
+    public void testSearchManagedUsesManagedFieldsStemmedTermFromOrig2() {
+        assertQ(
+                "search uses doc count",
+                req(
+                        "q", "notlike",
+                        "qf", "text_stem",
+                        "defType", "edismax",
+                        "debug", "true"),
+                "//lst[@name='explain']/str[@name='4' and contains(text(),\"3 = n, number of documents containing term\")]");
+    }
+
+    public void testSearchManagedUsesManagedFieldsUsesQueryAnalyzer() {
+        assertQ(
+                "search uses doc count",
+                req(
+                        "q", "polici",
+                        "qf", "text_stem_index_only",
+                        "defType", "edismax",
+                        "debug", "true"),
+                "//lst[@name='explain']/str[@name='4' and contains(text(),\"5 = n, number of documents containing term\")]");
+    }
+
 
     public void indexDocs() {
 
@@ -100,7 +133,7 @@ public class ManagedStatsCacheOverrideTest extends SolrTestCaseJ4 {
         ));
         assertU(adoc("id", "4", "text", "bar", "not_managed", "nachos"
         ));
-        assertU(adoc("id", "4", "text", "policy cat cats", "not_managed", "nachos"
+        assertU(adoc("id", "4", "text", "policy notlike cat cats", "not_managed", "nachos"
         ));
         assertU(commit());
     }

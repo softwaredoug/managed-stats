@@ -83,12 +83,16 @@ public class ManagedStatsSource extends StatsSource {
 
     private Analyzer getBestIndexAnalyzer(String field) {
         SchemaField schemaField = this.schema.getField(field);
+        Analyzer rVal = null;
         if (override != null && schemaField.getType() instanceof TextField) {
-            return schemaField.getType().getIndexAnalyzer();
+            log.trace("Using field's own index analyzer to process override file ", schemaField.getName());
+            rVal = schemaField.getType().getIndexAnalyzer();
         } else {
             ManagedTextField converted = getBestManagedTextField(field);
-            return converted.getIndexAnalyzer();
+            log.trace("Using the MANAGED index", converted.getTypeName(), " analyzer to process override file ");
+            rVal = converted.getIndexAnalyzer();
         }
+        return rVal;
     }
 
     @Override

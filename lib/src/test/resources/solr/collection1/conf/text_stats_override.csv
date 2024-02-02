@@ -29,3 +29,9 @@ not_managed,nachos,12,22
 text_stem,cat,1,2
 text_stem,cats,3,4
 text_stem,policy,5,9
+text_stem,notlike,3,3
+
+text_stem_index_only,cat,1,2
+text_stem_index_only,cats,3,4
+text_stem_index_only,policy,5,9
+text_stem_index_only,notlike,3,3
