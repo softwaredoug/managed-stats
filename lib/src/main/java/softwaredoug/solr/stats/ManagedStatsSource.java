@@ -43,7 +43,7 @@ public class ManagedStatsSource extends StatsSource {
                 String fieldTypeName = entry.getKey();
                 log.trace("Is ManagedTextField? checking field type: {}", fieldTypeName);
 
-                if (asManaged != null && asManaged.wants_to_override_all_field_stats()) {
+                if (asManaged != null) {
                     if (overrider != null) {
                         throw new IllegalArgumentException("Only one fieldtype can set to override all text field stats. " +
                                 "you have set both " + fieldTypeName + " and " + overriderName + " please only specify one");

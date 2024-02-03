@@ -26,7 +26,6 @@ public class ManagedTextField extends TextField implements ResourceLoaderAware {
     private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     private String statsFile;
-    private boolean override_all_fields;
 
     private OverrideFile overrides;
 
@@ -38,10 +37,9 @@ public class ManagedTextField extends TextField implements ResourceLoaderAware {
         this.statsFile = args.remove("stats");
         this.overrides = null;
 
-        this.override_all_fields = false;
         String override = args.remove("override");
         if (override != null) {
-            this.override_all_fields = Boolean.valueOf(override);
+            log.warn("Override setting is deprecated and considered to always be enabled. Ignoring");
         }
 
         super.init(schema, args);
@@ -55,10 +53,6 @@ public class ManagedTextField extends TextField implements ResourceLoaderAware {
         Map<String, String> config = getNonFieldPropertyArgs();
 
         this.overrides = new OverrideFile(lines, typeName, config);
-    }
-
-    public boolean wantsToOverride() {
-        return this.override_all_fields;
     }
 
     public TermStatistics termStatistics(Term term, Map<OverrideFile.AnalysisOption, Analyzer> analyzerOptions) {
@@ -83,10 +77,6 @@ public class ManagedTextField extends TextField implements ResourceLoaderAware {
     @Override
     public IndexableField createField(SchemaField field, Object value) {
         return super.createField(field, value);
-    }
-
-    public boolean wants_to_override_all_field_stats() {
-        return this.override_all_fields;
     }
 
 }
