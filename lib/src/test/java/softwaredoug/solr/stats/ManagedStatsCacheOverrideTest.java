@@ -42,11 +42,6 @@ public class ManagedStatsCacheOverrideTest extends SolrTestCaseJ4 {
 
 
     public void testSearchManagedUsesManagedFieldsAnalyzer() {
-        /* Check for these overrides:
-        text_stem,cat,1,2
-        text_stem,cats,3,4      # Most stemmed preferred, this is ignored
-        text_stem,policy,5,9
-         */
         assertQ(
                 "search uses doc count",
                 req(
@@ -115,8 +110,8 @@ public class ManagedStatsCacheOverrideTest extends SolrTestCaseJ4 {
         assertQ(
                 "search uses doc count",
                 req(
-                        "q", "polici",
-                        "qf", "text_stem_index_only",
+                        "q", "policy",
+                        "qf", "text_stem_query_only",
                         "defType", "edismax",
                         "debug", "true"),
                 "//lst[@name='explain']/str[@name='4' and contains(text(),\"5 = n, number of documents containing term\")]");
@@ -133,7 +128,7 @@ public class ManagedStatsCacheOverrideTest extends SolrTestCaseJ4 {
         ));
         assertU(adoc("id", "4", "text", "bar", "not_managed", "nachos"
         ));
-        assertU(adoc("id", "4", "text", "policy notlike cat cats", "not_managed", "nachos"
+        assertU(adoc("id", "4", "text", "polici policy notlike cat cats", "not_managed", "nachos"
         ));
         assertU(commit());
     }

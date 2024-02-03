@@ -21,12 +21,12 @@
     <field name="id" type="string" indexed="true" stored="true" required="true" multiValued="false" />
     <field name="text" type="text_general" indexed="true" stored="false" multiValued="true"/>
     <field name="text_stem" type="text_stemmed" indexed="true" stored="false" multiValued="true"/>
-    <field name="text_stem_index_only" type="text_stemmed_index_only" indexed="true" stored="false" multiValued="true"/>
+    <field name="text_stem_query_only" type="text_stemmed_query_only" indexed="true" stored="false" multiValued="true"/>
 
     <field name="not_managed" type="non_managed" indexed="true" stored="false" multiValued="true"/>
     <field name="_version_" type="long" indexed="true" stored="true" />
     <copyField source="text" dest="text_stem" />
-    <copyField source="text" dest="text_stem_index_only" />
+    <copyField source="text" dest="text_stem_query_only" />
   </fields>
 
   <uniqueKey>id</uniqueKey>
@@ -56,15 +56,15 @@
     </analyzer>
     </fieldType>
 
-    <fieldType name="text_stemmed_index_only"  class="solr.TextField" positionIncrementGap="100">
+    <fieldType name="text_stemmed_query_only"  class="solr.TextField" positionIncrementGap="100">
       <analyzer type="index">
         <tokenizer class="solr.StandardTokenizerFactory"/>
         <filter class="solr.LowerCaseFilterFactory"/>
-        <filter class="solr.PorterStemFilterFactory"/>
       </analyzer>
       <analyzer type="query">
         <tokenizer class="solr.StandardTokenizerFactory"/>
         <filter class="solr.LowerCaseFilterFactory"/>
+        <filter class="solr.PorterStemFilterFactory"/>
       </analyzer>
     </fieldType>
 

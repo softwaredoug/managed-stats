@@ -40,6 +40,8 @@ public class ManagedTextField extends TextField implements ResourceLoaderAware {
         // Override, use the overriders analyzer
     }
 
+    public static AnalysisOption DEFAULT_ANALYSIS = AnalysisOption.QUERY;
+
     AnalysisOption parseAnalysisOption(String option) {
         switch (option.toLowerCase()) {
             case "raw":
@@ -98,7 +100,7 @@ public class ManagedTextField extends TextField implements ResourceLoaderAware {
                                                        + " you provided: " + line);
                 }
                 long[] stats = new long[4];
-                AnalysisOption howToAnalyze = AnalysisOption.INDEX;
+                AnalysisOption howToAnalyze = DEFAULT_ANALYSIS;
                 int idx = 0;
                 String fieldName = statsHeader[0];
                 for (String globalStat : statsHeader) {
@@ -130,7 +132,7 @@ public class ManagedTextField extends TextField implements ResourceLoaderAware {
             }
             else {
                 // Now for individual terms
-                AnalysisOption analysisOption = AnalysisOption.INDEX;
+                AnalysisOption analysisOption = DEFAULT_ANALYSIS;
                 String unanalyzedTerm = null;
                 String field = null;
                 long docFreq = 0;
@@ -147,7 +149,7 @@ public class ManagedTextField extends TextField implements ResourceLoaderAware {
                 totalTermFreq = Long.parseLong(line_split[line_split.length - 1]);
                 analysisOption = analysisOptionMap.get(field);
                 if (analysisOption == null) {
-                    analysisOption = AnalysisOption.INDEX;
+                    analysisOption = DEFAULT_ANALYSIS;
                 }
                 String[] remainder = Arrays.copyOfRange(line_split, 1, line_split.length - 2);
                 unanalyzedTerm = String.join(",", remainder);
