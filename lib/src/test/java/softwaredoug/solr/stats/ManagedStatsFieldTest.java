@@ -21,7 +21,7 @@ public class ManagedStatsFieldTest extends SolrTestCaseJ4 {
 
     private ManagedTextField managedField;
 
-    private Map<ManagedTextField.AnalysisOption, Analyzer> analysisOptions;
+    private Map<OverrideFile.AnalysisOption, Analyzer> analysisOptions;
 
     @Before
     public void setupStats() throws Exception {
@@ -33,10 +33,10 @@ public class ManagedStatsFieldTest extends SolrTestCaseJ4 {
         FieldType fieldType = schema.getFieldTypeByName("text_general");
         this.managedField = (ManagedTextField)fieldType;
 
-        analysisOptions = new HashMap<ManagedTextField.AnalysisOption, Analyzer>();
-        analysisOptions.put( ManagedTextField.AnalysisOption.OVERRIDE, fieldType.getIndexAnalyzer());
-        analysisOptions.put( ManagedTextField.AnalysisOption.INDEX, fieldType.getIndexAnalyzer());
-        analysisOptions.put( ManagedTextField.AnalysisOption.QUERY, fieldType.getIndexAnalyzer());
+        analysisOptions = new HashMap<OverrideFile.AnalysisOption, Analyzer>();
+        analysisOptions.put( OverrideFile.AnalysisOption.OVERRIDE, fieldType.getIndexAnalyzer());
+        analysisOptions.put( OverrideFile.AnalysisOption.INDEX, fieldType.getIndexAnalyzer());
+        analysisOptions.put( OverrideFile.AnalysisOption.QUERY, fieldType.getIndexAnalyzer());
 
     }
 

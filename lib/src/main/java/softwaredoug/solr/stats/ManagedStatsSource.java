@@ -82,14 +82,14 @@ public class ManagedStatsSource extends StatsSource {
         return null;
     }
 
-    private Map<ManagedTextField.AnalysisOption, Analyzer> getAnalyzerOptions(String field) {
+    private Map<OverrideFile.AnalysisOption, Analyzer> getAnalyzerOptions(String field) {
         SchemaField schemaField = this.schema.getField(field);
         ManagedTextField converted = getBestManagedTextField(field);
 
-        Map<ManagedTextField.AnalysisOption, Analyzer> options = new HashMap<ManagedTextField.AnalysisOption, Analyzer>();
-        options.put(ManagedTextField.AnalysisOption.INDEX, schemaField.getType().getIndexAnalyzer());
-        options.put(ManagedTextField.AnalysisOption.QUERY, schemaField.getType().getQueryAnalyzer());
-        options.put(ManagedTextField.AnalysisOption.OVERRIDE, converted.getIndexAnalyzer());
+        Map<OverrideFile.AnalysisOption, Analyzer> options = new HashMap<OverrideFile.AnalysisOption, Analyzer>();
+        options.put(OverrideFile.AnalysisOption.INDEX, schemaField.getType().getIndexAnalyzer());
+        options.put(OverrideFile.AnalysisOption.QUERY, schemaField.getType().getQueryAnalyzer());
+        options.put(OverrideFile.AnalysisOption.OVERRIDE, converted.getIndexAnalyzer());
         return options;
     }
 
@@ -101,7 +101,7 @@ public class ManagedStatsSource extends StatsSource {
             log.trace("Falling back: No ManagedTextField for field: {} term: {}", term.field(), term.text());
             return this.fallback.termStatistics(localSearcher, term, docFreq, totalTermFreq);
         }
-        Map<ManagedTextField.AnalysisOption, Analyzer> options = getAnalyzerOptions(term.field());
+        Map<OverrideFile.AnalysisOption, Analyzer> options = getAnalyzerOptions(term.field());
         termStats = fieldType.termStatistics(term, options);
         if (termStats == null) {
             termStats = this.fallback.termStatistics(localSearcher, term, docFreq, totalTermFreq);
