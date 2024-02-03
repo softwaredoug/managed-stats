@@ -53,6 +53,32 @@ public class ManagedStatsChooseAnalyzerTest extends SolrTestCaseJ4 {
     }
 
 
+    public void testSearchManagedUsesNosAnalyzerIfRaw() {
+        /* Check for these overrides:
+            # No analysis performed on these terms
+            text_stem_raw_stats,cats,3,3
+            text_stem_raw_stats,polici,5,9
+         */
+        assertQ(
+                "search uses doc count based on override managed analyzer",
+                req(
+                        "q", "cats",
+                        "qf", "text_stem_raw_stats",
+                        "defType", "edismax",
+                        "debug", "true"),
+                "//lst[@name='explain']/str[@name='4' and contains(text(),\"3 = n, number of documents containing term\")]");
+
+        assertQ(
+                "search uses doc count based on override managed analyzer",
+                req(
+                        "q", "policy",
+                        "qf", "text_stem_raw_stats",
+                        "defType", "edismax",
+                        "debug", "true"),
+                "//lst[@name='explain']/str[@name='4' and contains(text(),\"5 = n, number of documents containing term\")]");
+    }
+
+
 
     public void indexDocs() {
 
@@ -64,7 +90,7 @@ public class ManagedStatsChooseAnalyzerTest extends SolrTestCaseJ4 {
         ));
         assertU(adoc("id", "4", "text", "bar", "not_managed", "nachos"
         ));
-        assertU(adoc("id", "4", "text", "policy notlike cat cats", "not_managed", "nachos"
+        assertU(adoc("id", "4", "text", "policy polici notlike cat cats", "not_managed", "nachos"
         ));
         assertU(commit());
     }

@@ -26,3 +26,7 @@ text,comma,term,4,8
 text_stem_query_only,cats,3,3
 text_stem_query_only,policy,5,9
 text_stem_query_only,notlike,3,3
+
+# No analysis performed on these terms
+text_stem_raw_stats,cat,3,3
+text_stem_raw_stats,polici,5,9
