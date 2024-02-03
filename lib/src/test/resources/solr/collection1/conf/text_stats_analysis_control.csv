@@ -11,6 +11,8 @@ fields
 text,10,11,13,13,index
 text_stem,10,11,13,13,override
 text_stem_query_only,10,11,13,13,query
+text_stem_raw_stats,10,11,13,13,raw
+
 
 terms
 text,foo,2,8

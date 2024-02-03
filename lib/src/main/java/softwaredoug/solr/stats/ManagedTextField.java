@@ -1,15 +1,12 @@
 package softwaredoug.solr.stats;
 
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.analysis.tokenattributes.TermToBytesRefAttribute;
 import org.apache.lucene.util.ResourceLoader;
 import org.apache.lucene.util.ResourceLoaderAware;
 import org.apache.lucene.index.IndexableField;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.CollectionStatistics;
 import org.apache.lucene.search.TermStatistics;
-import org.apache.lucene.util.BytesRef;
 
 import org.apache.solr.core.SolrResourceLoader;
 import org.apache.solr.schema.IndexSchema;
@@ -27,10 +24,10 @@ public class ManagedTextField extends TextField implements ResourceLoaderAware {
 
     private String statsFile;
 
-    private OverrideFile overrides;
+    private Overrides overrides;
 
 
-    public static OverrideFile.AnalysisOption DEFAULT_ANALYSIS = OverrideFile.AnalysisOption.QUERY;
+    public static Overrides.AnalysisOption DEFAULT_ANALYSIS = Overrides.AnalysisOption.QUERY;
 
     @Override
     protected void init(IndexSchema schema, Map<String, String> args) {
@@ -52,21 +49,13 @@ public class ManagedTextField extends TextField implements ResourceLoaderAware {
         List<String> lines = solrResourceLoader.getLines(this.statsFile);
         Map<String, String> config = getNonFieldPropertyArgs();
 
-        this.overrides = new OverrideFile(lines, typeName, config);
+        this.overrides = new Overrides(lines, typeName, config);
     }
 
-    public TermStatistics termStatistics(Term term, Map<OverrideFile.AnalysisOption, Analyzer> analyzerOptions) {
+    public TermStatistics termStatistics(Term term, Map<Overrides.AnalysisOption, Analyzer> analyzerOptions) {
         // slow for correctness, very bad to do this here
         log.trace("Lookup stats for term: {}", term);
-
-        for (AnalyzedTermStats stats: this.overrides.getTermStats()) {
-            TermStatistics thisStat = stats.getStats(term.field(), analyzerOptions);
-            if (thisStat != null && thisStat.term().equals(term.bytes()) && term.field().equals(stats.getField())) {
-                log.trace("Override term stats found for term: {}", term);
-                return thisStat;
-            }
-        }
-        return null;
+        return this.overrides.findBestOverride(term, analyzerOptions);
     }
 
     public CollectionStatistics collectionStatistics(String field) {

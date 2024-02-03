@@ -1,13 +1,16 @@
 package softwaredoug.solr.stats;
 
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.index.Term;
 import org.apache.lucene.search.CollectionStatistics;
+import org.apache.lucene.search.TermStatistics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.invoke.MethodHandles;
 import java.util.*;
 
-public class OverrideFile {
+public class Overrides {
 
     private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
@@ -39,13 +42,19 @@ public class OverrideFile {
     }
 
 
+    // Source of truth for the overrides because we don't know how to analyze them yet
     private List<AnalyzedTermStats> termStats;  // field -> termStats
-    private HashMap<String, CollectionStatistics> fieldStats;
 
-    public OverrideFile(List<String> lines, String typeName, Map<String, String > config) {
+    // Once analyzed, we can save them here so we don't need to lookup again
+    private Map<Term, TermStatistics> termStatsCached; // field,term -> once processed
+    // Global collection stats for each field
+    private Map<String, CollectionStatistics> fieldStats;
+
+    public Overrides(List<String> lines, String typeName, Map<String, String > config) {
 
         fieldStats = new HashMap<String, CollectionStatistics>();
         termStats = new ArrayList<AnalyzedTermStats>();
+        termStatsCached = new HashMap<Term, TermStatistics>();
 
         Map<String, AnalysisOption> analysisOptionMap = new HashMap<>();
         String currField = "";
@@ -132,6 +141,23 @@ public class OverrideFile {
 
         log.info("ManagedTextField created. Storing stats for {} fields; {} terms",
                 this.fieldStats.size(), this.getTermStats().size());
+    }
+
+    public TermStatistics findBestOverride(Term term, Map<Overrides.AnalysisOption, Analyzer> analyzerOptions) {
+        TermStatistics fromCache = this.termStatsCached.get(term);
+        if (fromCache != null) {
+            return fromCache;
+        }
+
+        for (AnalyzedTermStats stats: this.getTermStats()) {
+            TermStatistics thisStat = stats.getStats(term.field(), analyzerOptions);
+            if (thisStat != null && thisStat.term().equals(term.bytes()) && term.field().equals(stats.getField())) {
+                log.trace("Override term stats found for term: {}", term);
+                this.termStatsCached.put(term, thisStat);
+                return thisStat;
+            }
+        }
+        return null;
     }
 
     public List<AnalyzedTermStats> getTermStats() {

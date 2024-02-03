@@ -31,6 +31,9 @@ public class ManagedStatsSource extends StatsSource {
         this.fallback = fallback;
         this.schema = schema;
         this.override = getManagedTextFieldOverride();
+        if (this.override != null) {
+            log.warn("Now overriding term stats from field type: {}", this.override.getTypeName());
+        }
     }
 
     private ManagedTextField getManagedTextFieldOverride() {
@@ -45,7 +48,7 @@ public class ManagedStatsSource extends StatsSource {
 
                 if (asManaged != null) {
                     if (overrider != null) {
-                        throw new IllegalArgumentException("Only one fieldtype can set to override all text field stats. " +
+                        throw new IllegalArgumentException("Only one fieldtype can by a ManagedTextField and override all stats. " +
                                 "you have set both " + fieldTypeName + " and " + overriderName + " please only specify one");
                     }
                     overrider = asManaged;
@@ -82,14 +85,14 @@ public class ManagedStatsSource extends StatsSource {
         return null;
     }
 
-    private Map<OverrideFile.AnalysisOption, Analyzer> getAnalyzerOptions(String field) {
+    private Map<Overrides.AnalysisOption, Analyzer> getAnalyzerOptions(String field) {
         SchemaField schemaField = this.schema.getField(field);
         ManagedTextField converted = getBestManagedTextField(field);
 
-        Map<OverrideFile.AnalysisOption, Analyzer> options = new HashMap<OverrideFile.AnalysisOption, Analyzer>();
-        options.put(OverrideFile.AnalysisOption.INDEX, schemaField.getType().getIndexAnalyzer());
-        options.put(OverrideFile.AnalysisOption.QUERY, schemaField.getType().getQueryAnalyzer());
-        options.put(OverrideFile.AnalysisOption.OVERRIDE, converted.getIndexAnalyzer());
+        Map<Overrides.AnalysisOption, Analyzer> options = new HashMap<Overrides.AnalysisOption, Analyzer>();
+        options.put(Overrides.AnalysisOption.INDEX, schemaField.getType().getIndexAnalyzer());
+        options.put(Overrides.AnalysisOption.QUERY, schemaField.getType().getQueryAnalyzer());
+        options.put(Overrides.AnalysisOption.OVERRIDE, converted.getIndexAnalyzer());
         return options;
     }
 
@@ -101,7 +104,7 @@ public class ManagedStatsSource extends StatsSource {
             log.trace("Falling back: No ManagedTextField for field: {} term: {}", term.field(), term.text());
             return this.fallback.termStatistics(localSearcher, term, docFreq, totalTermFreq);
         }
-        Map<OverrideFile.AnalysisOption, Analyzer> options = getAnalyzerOptions(term.field());
+        Map<Overrides.AnalysisOption, Analyzer> options = getAnalyzerOptions(term.field());
         termStats = fieldType.termStatistics(term, options);
         if (termStats == null) {
             termStats = this.fallback.termStatistics(localSearcher, term, docFreq, totalTermFreq);

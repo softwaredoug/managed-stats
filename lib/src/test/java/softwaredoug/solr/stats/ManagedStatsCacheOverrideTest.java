@@ -118,6 +118,37 @@ public class ManagedStatsCacheOverrideTest extends SolrTestCaseJ4 {
     }
 
 
+
+    public void testSearchManagedRepeatedSameDocCount() {
+        assertQ(
+                "search uses doc count",
+                req(
+                        "q", "policy",
+                        "qf", "text_stem_query_only",
+                        "defType", "edismax",
+                        "debug", "true"),
+                "//lst[@name='explain']/str[@name='4' and contains(text(),\"5 = n, number of documents containing term\")]");
+
+        assertQ(
+                "search uses doc count",
+                req(
+                        "q", "policy",
+                        "qf", "text_stem_query_only",
+                        "defType", "edismax",
+                        "debug", "true"),
+                "//lst[@name='explain']/str[@name='4' and contains(text(),\"5 = n, number of documents containing term\")]");
+
+        assertQ(
+                "search uses doc count",
+                req(
+                        "q", "policy",
+                        "qf", "text_stem_query_only",
+                        "defType", "edismax",
+                        "debug", "true"),
+                "//lst[@name='explain']/str[@name='4' and contains(text(),\"5 = n, number of documents containing term\")]");
+    }
+
+
     public void indexDocs() {
 
         assertU(adoc("id", "1",

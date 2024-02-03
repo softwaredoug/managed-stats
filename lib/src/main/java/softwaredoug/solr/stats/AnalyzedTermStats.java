@@ -20,10 +20,10 @@ public class AnalyzedTermStats {
     private long docFreq;
     private long totalTermFreq;
 
-    private OverrideFile.AnalysisOption analysisOption;
+    private Overrides.AnalysisOption analysisOption;
 
     AnalyzedTermStats(String field, String term, long docFreq, long totalTermFreq,
-                      OverrideFile.AnalysisOption analysisOption) {
+                      Overrides.AnalysisOption analysisOption) {
         this.unanalyzedTerm = term;
         this.field = field;
         this.docFreq = docFreq;
@@ -32,7 +32,7 @@ public class AnalyzedTermStats {
         this.analysisOption = analysisOption;
     }
 
-    public Term getTerm(String field, Map<OverrideFile.AnalysisOption, Analyzer> options) {
+    public Term getTerm(String field, Map<Overrides.AnalysisOption, Analyzer> options) {
         if (!field.equals(this.field)) {
             return null;
         }
@@ -42,7 +42,7 @@ public class AnalyzedTermStats {
 
         Analyzer analyzer = options.get(this.analysisOption);
 
-        if (this.analysisOption == OverrideFile.AnalysisOption.RAW || analyzer == null) {
+        if (this.analysisOption == Overrides.AnalysisOption.RAW || analyzer == null) {
             this.analyzedTerm = new BytesRef(this.unanalyzedTerm);
             return new Term(field, this.analyzedTerm);
         }
@@ -69,7 +69,7 @@ public class AnalyzedTermStats {
         return this.field;
     }
 
-    public TermStatistics getStats(String field, Map<OverrideFile.AnalysisOption, Analyzer> options) {
+    public TermStatistics getStats(String field, Map<Overrides.AnalysisOption, Analyzer> options) {
         Term term = this.getTerm(field, options);
         if (term != null) {
             return new TermStatistics(term.bytes(), this.docFreq, this.totalTermFreq);
