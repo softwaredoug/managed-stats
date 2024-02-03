@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
+import java.util.HashMap;
 import java.util.Map;
 
 public class ManagedStatsSource extends StatsSource {
@@ -81,18 +82,15 @@ public class ManagedStatsSource extends StatsSource {
         return null;
     }
 
-    private Analyzer getBestIndexAnalyzer(String field) {
+    private Map<ManagedTextField.AnalysisOption, Analyzer> getAnalyzerOptions(String field) {
         SchemaField schemaField = this.schema.getField(field);
-        Analyzer rVal = null;
-        if (override != null && schemaField.getType() instanceof TextField) {
-            log.trace("Using field's own index analyzer to process override file ", schemaField.getName());
-            rVal = schemaField.getType().getIndexAnalyzer();
-        } else {
-            ManagedTextField converted = getBestManagedTextField(field);
-            log.trace("Using the MANAGED index", converted.getTypeName(), " analyzer to process override file ");
-            rVal = converted.getIndexAnalyzer();
-        }
-        return rVal;
+        ManagedTextField converted = getBestManagedTextField(field);
+
+        Map<ManagedTextField.AnalysisOption, Analyzer> options = new HashMap<ManagedTextField.AnalysisOption, Analyzer>();
+        options.put(ManagedTextField.AnalysisOption.INDEX, schemaField.getType().getIndexAnalyzer());
+        options.put(ManagedTextField.AnalysisOption.QUERY, schemaField.getType().getQueryAnalyzer());
+        options.put(ManagedTextField.AnalysisOption.OVERRIDE, converted.getIndexAnalyzer());
+        return options;
     }
 
     @Override
@@ -103,8 +101,8 @@ public class ManagedStatsSource extends StatsSource {
             log.trace("Falling back: No ManagedTextField for field: {} term: {}", term.field(), term.text());
             return this.fallback.termStatistics(localSearcher, term, docFreq, totalTermFreq);
         }
-        Analyzer indexAnalyzer = getBestIndexAnalyzer(term.field());
-        termStats = fieldType.termStatistics(term, indexAnalyzer);
+        Map<ManagedTextField.AnalysisOption, Analyzer> options = getAnalyzerOptions(term.field());
+        termStats = fieldType.termStatistics(term, options);
         if (termStats == null) {
             termStats = this.fallback.termStatistics(localSearcher, term, docFreq, totalTermFreq);
             log.trace("Falling back: No termStats in managed field for field: {} term: {}", term.field(), term.text());

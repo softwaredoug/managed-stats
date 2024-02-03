@@ -31,6 +31,31 @@ public class ManagedTextField extends TextField implements ResourceLoaderAware {
     private List<AnalyzedTermStats> termStats;  // field -> termStats
     private HashMap<String, CollectionStatistics> fieldStats;
 
+    // How to analyze terms in the file
+    public enum AnalysisOption {
+        RAW, INDEX, QUERY, OVERRIDE
+        // Raw, no analysis done to file
+        // Index, used the field name in the term stat's row index analyzer
+        // Query, use the field name in the term stat's row query analyzer
+        // Override, use the overriders analyzer
+    }
+
+    AnalysisOption parseAnalysisOption(String option) {
+        switch (option.toLowerCase()) {
+            case "raw":
+                return AnalysisOption.RAW;
+            case "index":
+                return AnalysisOption.INDEX;
+            case "query":
+                return AnalysisOption.QUERY;
+            case "override":
+                return AnalysisOption.OVERRIDE;
+            default:
+                throw new IllegalArgumentException("Illegal analysis option provided: {}".format(option));
+        }
+
+    }
+
     @Override
     protected void init(IndexSchema schema, Map<String, String> args) {
         this.statsFile = args.remove("stats");
@@ -51,6 +76,7 @@ public class ManagedTextField extends TextField implements ResourceLoaderAware {
         final SolrResourceLoader solrResourceLoader = (SolrResourceLoader) loader;
         String typeName = getTypeName();
         Map<String, String> config = getNonFieldPropertyArgs();
+        Map<String, AnalysisOption> analysisOptionMap = new HashMap<>();
         String currField = "";
         boolean fields = true;
 
@@ -67,19 +93,31 @@ public class ManagedTextField extends TextField implements ResourceLoaderAware {
 
             if (fields) {
                 String[] statsHeader = line.split(",");
-                if (statsHeader.length != 5) {
+                if (statsHeader.length > 6 || statsHeader.length < 5) {
                     throw new IllegalArgumentException("Field stats should provide field name plus 4 stats"
                                                        + " you provided: " + line);
                 }
                 long[] stats = new long[4];
+                AnalysisOption howToAnalyze = AnalysisOption.INDEX;
                 int idx = 0;
                 String fieldName = statsHeader[0];
                 for (String globalStat : statsHeader) {
                     if (globalStat == fieldName) {
                         continue;
                     }
-                    stats[idx] = Long.parseLong(globalStat);
-                    idx++;
+                    switch (idx) {
+                        case 0:
+                        case 1:
+                        case 2:
+                        case 3:
+                            stats[idx] = Long.parseLong(globalStat);
+                            idx++;
+                            break;
+                            // optionally configure the analyzer
+                        case 4:
+                            howToAnalyze = parseAnalysisOption(globalStat);
+                            analysisOptionMap.put(fieldName, howToAnalyze);
+                    }
                 }
                 long docCount = stats[0];
                 long maxDocs = stats[1];
@@ -92,6 +130,7 @@ public class ManagedTextField extends TextField implements ResourceLoaderAware {
             }
             else {
                 // Now for individual terms
+                AnalysisOption analysisOption = AnalysisOption.INDEX;
                 String unanalyzedTerm = null;
                 String field = null;
                 long docFreq = 0;
@@ -106,7 +145,10 @@ public class ManagedTextField extends TextField implements ResourceLoaderAware {
                 field = line_split[0];
                 docFreq = Long.parseLong(line_split[line_split.length - 2]);
                 totalTermFreq = Long.parseLong(line_split[line_split.length - 1]);
-
+                analysisOption = analysisOptionMap.get(field);
+                if (analysisOption == null) {
+                    analysisOption = AnalysisOption.INDEX;
+                }
                 String[] remainder = Arrays.copyOfRange(line_split, 1, line_split.length - 2);
                 unanalyzedTerm = String.join(",", remainder);
 
@@ -114,7 +156,7 @@ public class ManagedTextField extends TextField implements ResourceLoaderAware {
                     throw new IllegalArgumentException("Doc stats error at: <" + line + "> -- docFreq more than totalTermFreq not allowed");
                 }
                 log.debug("Loaded term stats for field: {} term: {}", field, unanalyzedTerm);
-                this.termStats.add(new AnalyzedTermStats(field, unanalyzedTerm, docFreq, totalTermFreq));
+                this.termStats.add(new AnalyzedTermStats(field, unanalyzedTerm, docFreq, totalTermFreq, analysisOption));
             }
         }
 
@@ -126,20 +168,10 @@ public class ManagedTextField extends TextField implements ResourceLoaderAware {
         return this.override_all_fields;
     }
 
-    public TermStatistics termStatistics(Term term, Analyzer indexAnalyzer) {
-        if (indexAnalyzer != null) {
-            log.trace("Lookup stats for term: {} -- Analyzer {}", term.text(), indexAnalyzer.toString());
-        } else {
-            log.trace("Lookup stats for term: {} -- Analyzer NULL", term.text());
-        }
-
-        if (indexAnalyzer == null) {
-            indexAnalyzer = this.getIndexAnalyzer();
-        }
-
+    public TermStatistics termStatistics(Term term, Map<ManagedTextField.AnalysisOption, Analyzer> analyzerOptions) {
         // slow for correctness, very bad to do this here
         for (AnalyzedTermStats stats: this.termStats) {
-            TermStatistics thisStat = stats.getStats(term.field(), indexAnalyzer);
+            TermStatistics thisStat = stats.getStats(term.field(), analyzerOptions);
             if (thisStat != null && thisStat.term().equals(term.bytes()) && term.field().equals(stats.getField())) {
                 return thisStat;
             }
@@ -170,38 +202,48 @@ public class ManagedTextField extends TextField implements ResourceLoaderAware {
         private long docFreq;
         private long totalTermFreq;
 
-        AnalyzedTermStats(String field, String term, long docFreq, long totalTermFreq) {
+        private AnalysisOption analysisOption;
+
+        AnalyzedTermStats(String field, String term, long docFreq, long totalTermFreq,
+                          AnalysisOption analysisOption) {
             this.unanalyzedTerm = term;
             this.field = field;
             this.docFreq = docFreq;
             this.totalTermFreq = totalTermFreq;
             this.field = field;
+            this.analysisOption = analysisOption;
         }
 
-        public Term getTerm(String field, Analyzer indexAnalyzer) {
+        public Term getTerm(String field, Map<AnalysisOption, Analyzer> options) {
             if (!field.equals(this.field)) {
                 return null;
             }
-
             if (this.analyzedTerm != null) {
                 return new Term(field, this.analyzedTerm);
-            } else {
-                try (TokenStream source = indexAnalyzer.tokenStream(field, this.unanalyzedTerm)) {
-                    source.reset();
-                    TermToBytesRefAttribute termAtt = source.getAttribute(TermToBytesRefAttribute.class);
-                    if (!source.incrementToken()) {
-                        return null;
-                    }
-                    BytesRef termBytes = BytesRef.deepCopyOf(termAtt.getBytesRef());
+            }
 
-                    if (source.incrementToken()) {
-                        return null;
-                    }
-                    this.analyzedTerm = termBytes;
-                    return new Term(field, this.analyzedTerm);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
+            Analyzer analyzer = options.get(this.analysisOption);
+
+            if (this.analysisOption == AnalysisOption.RAW || analyzer == null) {
+                this.analyzedTerm = new BytesRef(this.unanalyzedTerm);
+                return new Term(field, this.analyzedTerm);
+            }
+
+            try (TokenStream source = analyzer.tokenStream(field, this.unanalyzedTerm)) {
+                source.reset();
+                TermToBytesRefAttribute termAtt = source.getAttribute(TermToBytesRefAttribute.class);
+                if (!source.incrementToken()) {
+                    return null;
                 }
+                BytesRef termBytes = BytesRef.deepCopyOf(termAtt.getBytesRef());
+
+                if (source.incrementToken()) {
+                    return null;
+                }
+                this.analyzedTerm = termBytes;
+                return new Term(field, this.analyzedTerm);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
         }
 
@@ -209,8 +251,8 @@ public class ManagedTextField extends TextField implements ResourceLoaderAware {
             return this.field;
         }
 
-        public TermStatistics getStats(String field, Analyzer indexAnalyzer) {
-            Term term = this.getTerm(field, indexAnalyzer);
+        public TermStatistics getStats(String field, Map<AnalysisOption, Analyzer> options) {
+            Term term = this.getTerm(field, options);
             if (term != null) {
                 return new TermStatistics(term.bytes(), this.docFreq, this.totalTermFreq);
             }

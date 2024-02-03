@@ -1,0 +1,26 @@
+# Contains a header with global term stats
+# field, docCount, maxDocs, sumTotalTermFreq, sumDocFreq
+#
+# Followed by a term stats field,term,docFreq,totalTermFreq.
+#
+# Optionally ended with an analyzer indicating how these terms line up to indexed terms
+#
+# All terms will be analyzed by the field's index analyzer prior to being loaded.
+#
+fields
+text,10,11,13,13,index
+text_stem,10,11,13,13,override
+text_stem_query_only,10,11,13,13,query
+
+terms
+text,foo,2,8
+text,bar,1,4
+text,stopword,4,8
+text,UPPERCASE,3,8
+text,two terms,4,8
+text,comma,term,4,8
+
+# Should match queries for cat, because we use the query analyzer
+text_stem_query_only,cats,3,3
+text_stem_query_only,policy,5,9
+text_stem_query_only,notlike,3,3

@@ -3,6 +3,7 @@
  */
 package softwaredoug.solr.stats;
 
+import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.CollectionStatistics;
 import org.apache.lucene.search.TermStatistics;
@@ -13,9 +14,14 @@ import org.apache.solr.schema.FieldType;
 import org.apache.solr.schema.IndexSchema;
 import org.junit.*;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class ManagedStatsFieldTest extends SolrTestCaseJ4 {
 
     private ManagedTextField managedField;
+
+    private Map<ManagedTextField.AnalysisOption, Analyzer> analysisOptions;
 
     @Before
     public void setupStats() throws Exception {
@@ -26,6 +32,12 @@ public class ManagedStatsFieldTest extends SolrTestCaseJ4 {
         IndexSchema schema = core.getLatestSchema();
         FieldType fieldType = schema.getFieldTypeByName("text_general");
         this.managedField = (ManagedTextField)fieldType;
+
+        analysisOptions = new HashMap<ManagedTextField.AnalysisOption, Analyzer>();
+        analysisOptions.put( ManagedTextField.AnalysisOption.OVERRIDE, fieldType.getIndexAnalyzer());
+        analysisOptions.put( ManagedTextField.AnalysisOption.INDEX, fieldType.getIndexAnalyzer());
+        analysisOptions.put( ManagedTextField.AnalysisOption.QUERY, fieldType.getIndexAnalyzer());
+
     }
 
     @After
@@ -55,7 +67,7 @@ public class ManagedStatsFieldTest extends SolrTestCaseJ4 {
     public void testGetsStatsForField() {
         BytesRef text = new BytesRef("foo".getBytes());
         Term term = new Term("text", text);
-        TermStatistics termStats = this.managedField.termStatistics(term, null);
+        TermStatistics termStats = this.managedField.termStatistics(term, analysisOptions);
 
         assertNotNull(termStats);
         assertEquals(term.bytes(), termStats.term());
@@ -67,7 +79,7 @@ public class ManagedStatsFieldTest extends SolrTestCaseJ4 {
     public void testTextAnalyzed() {
         BytesRef text = new BytesRef("uppercase".getBytes());
         Term term = new Term("text", text);
-        TermStatistics termStats = this.managedField.termStatistics(term, null);
+        TermStatistics termStats = this.managedField.termStatistics(term, analysisOptions);
         assertNotNull(termStats);
     }
 
@@ -75,7 +87,7 @@ public class ManagedStatsFieldTest extends SolrTestCaseJ4 {
     public void testGetsNoStatsIfNoTermProduced() {
         BytesRef text = new BytesRef("stopword".getBytes());
         Term term = new Term("text", text);
-        TermStatistics termStats = this.managedField.termStatistics(term, null);
+        TermStatistics termStats = this.managedField.termStatistics(term, analysisOptions);
         assertNull(termStats);
     }
 
@@ -83,7 +95,7 @@ public class ManagedStatsFieldTest extends SolrTestCaseJ4 {
     public void testAnalyzesToMultipleTermsIgnored() {
         BytesRef text = new BytesRef("two terms".getBytes());
         Term term = new Term("text", text);
-        TermStatistics termStats = this.managedField.termStatistics(term, null);
+        TermStatistics termStats = this.managedField.termStatistics(term, analysisOptions);
         assertNull(termStats);
     }
 
@@ -91,7 +103,7 @@ public class ManagedStatsFieldTest extends SolrTestCaseJ4 {
     public void testAnalyzesCommaTermsCorrectly() {
         BytesRef text = new BytesRef("comma,term".getBytes());
         Term term = new Term("text", text);
-        TermStatistics termStats = this.managedField.termStatistics(term, null);
+        TermStatistics termStats = this.managedField.termStatistics(term, analysisOptions);
         assertNull(termStats);
     }
 }
