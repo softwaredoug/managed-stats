@@ -1,10 +1,10 @@
-# Managed Stats plugin (experimental)
+# Managed Stats plugin
 
 Managed Solr field and term statistics
 
-This plugin lets you specify a config file to control term statistics for a field. It contains
+This plugin lets you specify a config file to control term statistics for a field. To configure, you need to add the following
 
-## A custom stats cache
+## Add this stats cache to your solrconfig.xml
 
 This causes Solr scoring to use the global term stats contained in each field's own config file.
 
@@ -12,9 +12,9 @@ This causes Solr scoring to use the global term stats contained in each field's 
  <statsCache class="softwaredoug.solr.stats.ManagedStatsCache" />
 ```
 
-## A custom FieldType
+## Add a special FieldType to your schema
 
-A FieldType to configure a specific field's term statistics. It functions exactly like a TextField, however it adds `stats` which contains a file for field statistics.
+A FieldType to configure a specific field's term statistics. This holds the overrides (CSVs). Only one may exist in your schema.
 
 ```
 <fieldType name="text_general" class="softwaredoug.solr.stats.ManagedTextField" stats="text_general_stats.csv" positionIncrementGap="100">
@@ -24,7 +24,7 @@ A FieldType to configure a specific field's term statistics. It functions exactl
 
 ## The stats csv format
 
-The CSV for the field stats.
+The CSV for the field stats, listing the field name, a term, its docFreq, totalTermFreq
 
 ```
 # Contains a header with global term stats
