@@ -17,7 +17,7 @@ This causes Solr scoring to use the global term stats contained in each field's 
 A FieldType to configure a specific field's term statistics. This holds the overrides (CSVs). Only one may exist in your schema.
 
 ```
-<fieldType name="text_general" class="softwaredoug.solr.stats.ManagedTextField" stats="text_general_stats.csv" positionIncrementGap="100">
+<fieldType name="override_settings" class="softwaredoug.solr.stats.ManagedTextField" stats="text_general_stats.csv" positionIncrementGap="100">
    ...
 </fieldType>
 ```
@@ -79,4 +79,28 @@ By default, we will use `text`s query analyzer to understand how to match the fi
 
 In the case of conflicts (multiple terms in the file being analyzed to the same value), we'll use the first one we find.
 
+### Changing Analysis settings
 
+You can optionally tell this plugin which analyzer to use to understand the terms in the file in the field header, ie:
+
+```
+fields
+text,10,11,13,13,raw
+```
+
+There are four options
+
+1. `raw` - do not analyze terms in this file. Treat these terms as raw terms
+2. `query` - use the field (in this case `text`'s query analyzer)
+3. `index` - use the field (in this case `text`'s index analyzer)
+4. `override` - use the analyzer for the override fieldType (ie `override_settings` above)
+
+When do you choose each? It depends how you gather your stats.
+
+When to use `raw`? - When you've done a lot of prep work. This is the ideal `raw` statistics. But this isn't always easy to acquire. It requires thinking ahead of time how query, etc terms would be analyzed in the Solr instance using the plugin.
+
+When to use `query` - In some cases, such as testing, you might be taking query terms, and using Solr's [terms component](https://solr.apache.org/guide/solr/latest/query-guide/terms-component.html) to get stats on the query terms. As the terms component does not perform analysis (ie `stemme`->`stemm`) you end up with lines of what your query's doc frequency, etc
+
+When to use `index`? - Instead of using terms component on queries, you're using them on terms in documents.
+
+When to use `override`? - Use override if you want to globally control tokenization of the file.
