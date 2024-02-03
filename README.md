@@ -1,6 +1,4 @@
-# Managed Stats plugin
-
-Managed Solr field and term statistics
+# Managed Stats plugin - TL; DR
 
 This plugin lets you specify a config file to control term statistics for a field. To configure, you need to add the following
 
