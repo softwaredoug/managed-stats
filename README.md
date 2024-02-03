@@ -107,6 +107,8 @@ When to use `override`? - Use override if you want to globally control tokenizat
 
 ### Acquiring the statistics
 
+In a testing scenario, you're downloading stats from a "true" source of the statistics. Like a production Solr instance.
+
 Assuming you have a production Solr instance, and you want to recreate BM25 scoring on a local instance, you can use the following to gather stats on certain terms
 
 1. Use the [terms component](https://solr.apache.org/guide/solr/latest/query-guide/terms-component.html)
