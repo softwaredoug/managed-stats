@@ -9,6 +9,7 @@ import org.apache.lucene.search.CollectionStatistics;
 import org.apache.lucene.search.TermStatistics;
 
 import org.apache.solr.core.SolrResourceLoader;
+import org.apache.solr.core.SolrResourceNotFoundException;
 import org.apache.solr.schema.IndexSchema;
 import org.apache.solr.schema.SchemaField;
 import org.apache.solr.schema.TextField;
@@ -46,9 +47,14 @@ public class ManagedTextField extends TextField implements ResourceLoaderAware {
     public void inform(ResourceLoader loader) throws IOException {
         final SolrResourceLoader solrResourceLoader = (SolrResourceLoader) loader;
         String typeName = getTypeName();
-        List<String> lines = solrResourceLoader.getLines(this.statsFile);
+        List<String> lines = new ArrayList<>();
+        try {
+            lines = solrResourceLoader.getLines(this.statsFile);
+        }
+        catch (SolrResourceNotFoundException e) {
+            log.warn("File {} not found, ManagedStats plugin will default to local stats");
+        }
         Map<String, String> config = getNonFieldPropertyArgs();
-
         this.overrides = new Overrides(lines, typeName, config);
     }
 
