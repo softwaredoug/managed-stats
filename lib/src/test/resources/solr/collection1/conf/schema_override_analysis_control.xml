@@ -21,6 +21,8 @@
     <field name="id" type="string" indexed="true" stored="true" required="true" multiValued="false" />
     <field name="text" type="text_general" indexed="true" stored="false" multiValued="true"/>
     <field name="text_stem_query_only" type="text_stemmed_query_only" indexed="true" stored="false" multiValued="true"/>
+    <field name="text_stem_raw_stats" type="text_stemmed_query_only" indexed="true" stored="false" multiValued="true"/>
+
 
     <field name="not_managed" type="non_managed" indexed="true" stored="false" multiValued="true"/>
     <field name="_version_" type="long" indexed="true" stored="true" />
